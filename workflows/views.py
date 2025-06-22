@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins
-from workflows.models import Workspace, Workflow, Trigger, Action
+from workflows.models import Workspace, Workflow, Trigger, Action, ExecutionLog
 from workflows.serializers import WorkspaceListSerializer, WorkspaceSerializer, WorkflowListSerializer, \
-    WorkflowSerializer, TriggerSerializer, ActionSerializer
+    WorkflowSerializer, TriggerSerializer, ActionSerializer, ExecutionLogSerializer, ExecutionLogListSerializer
 
 
 class WorkspaceView(viewsets.ModelViewSet):
@@ -79,3 +79,15 @@ class WorkflowActionView(mixins.ListModelMixin,
     def perform_create(self, serializer):
         workflow = self.get_workflow()
         serializer.save(workflow=workflow)
+
+
+class ExecutionLogsView(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    queryset = ExecutionLog.objects.all()
+    serializer_class = ExecutionLogSerializer
+
+class WorkflowExecutionLogsView(mixins.ListModelMixin, viewsets.GenericViewSet):
+    serializer_class = ExecutionLogListSerializer
+
+    def get_queryset(self):
+        wf = get_object_or_404(Workflow, pk=self.kwargs['workflow_pk'])
+        return ExecutionLog.objects.filter(workflow=wf)
