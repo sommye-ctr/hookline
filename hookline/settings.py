@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'workflows.apps.WorkflowsConfig',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

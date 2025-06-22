@@ -1,0 +1,103 @@
+from django.contrib.auth.models import User
+from rest_framework import serializers
+
+from workflows.models import Workspace, Trigger, Action, Workflow, ExecutionLog
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        read_only_fields = ['id']
+
+class WorkspaceSerializer(serializers.ModelSerializer):
+    owner = UserSerializer(read_only=True)
+    workflows_count = serializers.SerializerMethodField()
+    class Meta:
+        model = Workspace
+        fields = ['id', 'name', 'owner', 'workflows_count', 'date_created', 'date_updated']
+        read_only_fields = ['id', 'date_updated', 'date_created']
+
+    def get_workflows_count(self, workspace):
+        return workspace.workflows.count()
+class WorkspaceListSerializer(serializers.ModelSerializer):
+    owner = serializers.StringRelatedField()
+    workflows_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Workspace
+        fields = ['id', 'name', 'owner', 'workflows_count', 'date_created']
+        read_only_fields = ['id', 'date_created']
+
+    def get_workflows_count(self, obj):
+        return obj.workflows.count()
+
+class TriggerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Trigger
+        fields = "__all__"
+
+class ActionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Action
+        fields = "__all__"
+
+class WorkflowListSerializer(serializers.ModelSerializer):
+    workspace_name = serializers.CharField(source='workspace.name', read_only=True)
+    triggers_count = serializers.SerializerMethodField()
+    actions_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Workflow
+        fields = [
+            'id', 'name', 'description', 'is_active', 'workspace_name',
+            'triggers_count', 'actions_count', 'date_created', 'date_updated'
+        ]
+        read_only_fields = ['id', 'date_created', 'date_updated']
+
+    def get_triggers_count(self, obj):
+        return obj.triggers.count()
+
+    def get_actions_count(self, obj):
+        return obj.actions.count()
+class WorkflowSerializer(serializers.ModelSerializer):
+    workspace = WorkspaceListSerializer(read_only=True)
+    workspace_id = serializers.UUIDField(write_only=True)
+    triggers = TriggerSerializer(many=True, read_only=True)
+    actions = ActionSerializer(many=True, read_only=True)
+    recent_logs = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Workflow
+        fields = [
+            'id', 'name', 'description', 'is_active', 'workspace', 'workspace_id',
+            'triggers', 'actions', 'recent_logs',
+            'date_created', 'date_updated'
+        ]
+        read_only_fields = ['id', 'date_created', 'date_updated']
+
+    def get_recent_logs(self, obj):
+        recent_logs = obj.logs.order_by('-timestamp')[:10]
+        return ExecutionLogSerializer(recent_logs, many=True).data
+
+class ExecutionLogSerializer(serializers.ModelSerializer):
+    workflow_name = serializers.CharField(source='workflow.name', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = ExecutionLog
+        fields = [
+            'id', 'workflow', 'workflow_name', 'timestamp',
+            'status', 'status_display', 'details'
+        ]
+        read_only_fields = ['id', 'timestamp']
+class ExecutionLogListSerializer(serializers.ModelSerializer):
+    workflow_name = serializers.CharField(source='workflow.name', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = ExecutionLog
+        fields = [
+            'id', 'workflow', 'workflow_name', 'timestamp', 'status', 'status_display'
+        ]
+        read_only_fields = ['id', 'timestamp']

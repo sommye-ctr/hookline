@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0cd7d8d6-508d-433b-a8a5-04e87949cd32" name="Changes" comment="Added api structure">
+    <list default="true" id="0cd7d8d6-508d-433b-a8a5-04e87949cd32" name="Changes" comment="Added models">
+      <change afterPath="$PROJECT_DIR$/workflows/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/workflows/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hookline/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/hookline/settings.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +97,8 @@
       <workItem from="1750530800358" duration="159000" />
       <workItem from="1750530964541" duration="1518000" />
       <workItem from="1750575340419" duration="767000" />
-      <workItem from="1750577902012" duration="3385000" />
+      <workItem from="1750577902012" duration="5213000" />
+      <workItem from="1750607043654" duration="2052000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -122,7 +124,15 @@
       <option name="project" value="LOCAL" />
       <updated>1750579032697</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Added models">
+      <option name="closed" value="true" />
+      <created>1750582943562</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1750582943562</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -132,6 +142,7 @@
     <MESSAGE value="Initial commit" />
     <MESSAGE value="Added postgres config" />
     <MESSAGE value="Added api structure" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added api structure" />
+    <MESSAGE value="Added models" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added models" />
   </component>
 </project>
