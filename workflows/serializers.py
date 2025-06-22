@@ -47,6 +47,11 @@ class ActionSerializer(serializers.ModelSerializer):
         model = Action
         fields = "__all__"
 
+    def validate_order(self, value):
+        if value < 1:
+            raise serializers.ValidationError("Order must be greater than 0")
+        return value
+
 class WorkflowListSerializer(serializers.ModelSerializer):
     workspace_name = serializers.CharField(source='workspace.name', read_only=True)
     triggers_count = serializers.SerializerMethodField()
