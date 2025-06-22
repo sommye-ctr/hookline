@@ -12,10 +12,15 @@ class UserSerializer(serializers.ModelSerializer):
 
 class WorkspaceSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
+    owner_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source="owner",
+        write_only=True
+    )
     workflows_count = serializers.SerializerMethodField()
     class Meta:
         model = Workspace
-        fields = ['id', 'name', 'owner', 'workflows_count', 'date_created', 'date_updated']
+        fields = ['id', 'name', 'owner', 'owner_id', 'workflows_count', 'date_created', 'date_updated']
         read_only_fields = ['id', 'date_updated', 'date_created']
 
     def get_workflows_count(self, workspace):
