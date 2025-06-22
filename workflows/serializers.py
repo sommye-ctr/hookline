@@ -67,7 +67,7 @@ class WorkflowListSerializer(serializers.ModelSerializer):
         return obj.actions.count()
 class WorkflowSerializer(serializers.ModelSerializer):
     workspace = WorkspaceListSerializer(read_only=True)
-    workspace_id = serializers.UUIDField(write_only=True)
+    #workspace_id = serializers.UUIDField(write_only=True)
     triggers = TriggerSerializer(many=True, read_only=True)
     actions = ActionSerializer(many=True, read_only=True)
     recent_logs = serializers.SerializerMethodField()
@@ -75,7 +75,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workflow
         fields = [
-            'id', 'name', 'description', 'is_active', 'workspace', 'workspace_id',
+            'id', 'name', 'description', 'is_active', 'workspace',
             'triggers', 'actions', 'recent_logs',
             'date_created', 'date_updated'
         ]
