@@ -20,5 +20,6 @@ workflow_router.register("execution-logs", views.WorkflowExecutionLogsView, base
 urlpatterns = [
     path('', include(router.urls)),
     path('', include(workspace_router.urls)),
-    path('', include(workflow_router.urls))
+    path('', include(workflow_router.urls)),
+    path('webhooks/<uuid:workspace_id>/ingest', views.WebhookReceiverView.as_view(), name='webhook-ingest')
 ]

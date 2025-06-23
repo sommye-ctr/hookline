@@ -1,9 +1,11 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins
+from rest_framework.views import APIView, Response
+
 from workflows.models import Workspace, Workflow, Trigger, Action, ExecutionLog
 from workflows.serializers import WorkspaceListSerializer, WorkspaceSerializer, WorkflowListSerializer, \
     WorkflowSerializer, TriggerSerializer, ActionSerializer, ExecutionLogSerializer, ExecutionLogListSerializer
-
+from .tasks import log_event_task
 
 class WorkspaceView(viewsets.ModelViewSet):
     queryset = Workspace.objects.all()
@@ -91,3 +93,21 @@ class WorkflowExecutionLogsView(mixins.ListModelMixin, viewsets.GenericViewSet):
     def get_queryset(self):
         wf = get_object_or_404(Workflow, pk=self.kwargs['workflow_pk'])
         return ExecutionLog.objects.filter(workflow=wf)
+
+class WebhookReceiverView(APIView):
+
+    def post(self, request, workspace_id):
+        ws = get_object_or_404(Workspace, pk=workspace_id)
+        event_payload = request.data
+        print(f"Webhook received for workspace {workspace_id}: {event_payload}")
+
+        obj = {
+            "workspace_id" : workspace_id,
+            "event_type" : event_payload['action'],
+            "payload" : event_payload,
+        }
+        log_event_task(obj)
+
+        return Response("From view")
+
+
