@@ -1,5 +1,10 @@
+import os
+import sys
+
+from django.conf import settings
 from django.utils.crypto import get_random_string
 import environ
+import importlib
 
 env = environ.Env()
 
@@ -30,3 +35,10 @@ def get_log_details_for_action(action):
     return {
         "action" : action.type
     }
+
+def load_action_plugin(slug):
+    some_dir = os.path.join(settings.BASE_DIR, 'plugins', slug)
+    sys.path.append(some_dir)
+
+    module = importlib.import_module("execution")
+    return module.execute

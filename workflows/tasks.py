@@ -2,7 +2,7 @@ from celery import shared_task
 
 from workflows.models import ExecutionLog, Workflow
 from workflows.trigger_registry import TriggerMatcher
-from workflows.utils import get_log_details_for_action
+from workflows.utils import get_log_details_for_action, load_action_plugin
 
 import logging
 import environ
@@ -25,7 +25,7 @@ def log_event_task(workspace_id, payload, event_type):
     try:
         wf = Workflow.objects.get(pk=workflow_id)
         for action in wf.actions.all():
-            execute_actions.delay(action.id, wf.id)
+            execute_actions.delay(action.id, wf.id, payload)
             #logging event
             ExecutionLog.objects.create(
                 workflow_id=workflow_id,
@@ -44,13 +44,15 @@ def log_event_task(workspace_id, payload, event_type):
     retry_backoff=True,
     retry_kwargs={"max_retries":int(env('ACTION_MAX_RETRIES'))}
 )
-def execute_actions(action_id, workflow_id):
+def execute_actions(action_id, workflow_id, payload):
     ExecutionLog.objects.create(
         workflow_id=workflow_id,
         status=ExecutionLog.ACTION_STARTED
     )
 
-    #TODO - Error handling in here...
+    #TODO - Error handling in here and remove this sample call
+    execute = load_action_plugin("email_sender")
+    execute(payload, {"to" : "someone@gmail.com"})
 
     print(f'{workflow_id}: {action_id} - Action executing...')
     ExecutionLog.objects.create(
