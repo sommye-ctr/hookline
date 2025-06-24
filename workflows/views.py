@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404
-from django.utils.archive import extract
 from rest_framework import viewsets, mixins, status
 from rest_framework.views import APIView, Response
 
@@ -108,7 +107,5 @@ class WebhookReceiverView(APIView):
         endpoint = get_object_or_404(WebhookEndpoint, token=token)
 
         event_type = extract_event_type(request.data, endpoint.platform)
-
         log_event_task(endpoint.workspace_id, request.data, event_type)
-
         return Response("Received", status=status.HTTP_200_OK)
