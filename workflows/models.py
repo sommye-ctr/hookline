@@ -89,3 +89,16 @@ class WebhookEndpoint(models.Model):
     class Meta:
         unique_together = ("workspace", "platform")
 
+
+class InstalledPlugin(models.Model):
+    workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE, related_name="installed_plugins")
+    slug = models.CharField(max_length=100)
+    name = models.CharField(max_length=200)
+    version = models.CharField(max_length=20)
+    user_config = models.JSONField() #TODO - db validator to prevent incorrect config
+    path = models.FilePathField() # TODO - Whitelist specific path
+    installed_at = models.DateTimeField(auto_now_add=True)
+    installed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        unique_together = ('workspace', 'slug')
