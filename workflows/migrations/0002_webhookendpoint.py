@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('platform', models.CharField(max_length=64)),
-                ('token', models.CharField(default=workflows.utils.generate_token, max_length=64, unique=True)),
+                ('token', models.CharField(default=workflows.utils.generate_webhook_token, max_length=64, unique=True)),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('workspace', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='webhooks', to='workflows.workspace')),
             ],

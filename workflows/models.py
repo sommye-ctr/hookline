@@ -3,7 +3,7 @@ import uuid
 from django.contrib.auth.models import User
 from django.db import models
 
-from workflows.utils import generate_token
+from workflows.utils import generate_webhook_token
 
 
 class Workspace(models.Model):
@@ -76,16 +76,16 @@ class ExecutionLog(models.Model):
     workflow = models.ForeignKey(to=Workflow, on_delete=models.CASCADE, related_name="logs")
     timestamp = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=2, choices=STATUS_CHOICES)
-    details = models.JSONField()
+    details = models.JSONField(default=dict)
 
     def __str__(self):
-        return self.id
+        return self.id.__str__()
 
 class WebhookEndpoint(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE, related_name="webhooks")
     platform = models.CharField(max_length=64)
-    token = models.CharField(max_length=64, unique=True, default=generate_token, editable=False)
+    token = models.CharField(max_length=64, unique=True, default=generate_webhook_token, editable=False)
     date_created = models.DateTimeField(auto_now_add=True)
 
     class Meta:

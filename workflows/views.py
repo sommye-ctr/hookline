@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, mixins
+from django.utils.archive import extract
+from rest_framework import viewsets, mixins, status
 from rest_framework.views import APIView, Response
 
 from workflows.models import Workspace, Workflow, Trigger, Action, ExecutionLog, WebhookEndpoint
@@ -7,6 +8,8 @@ from workflows.serializers import WorkspaceListSerializer, WorkspaceSerializer, 
     WorkflowSerializer, TriggerSerializer, ActionSerializer, ExecutionLogSerializer, ExecutionLogListSerializer, \
     WebhookEndpointSerializer
 from .tasks import log_event_task
+from .utils import extract_event_type
+
 
 class WorkspaceView(viewsets.ModelViewSet):
     queryset = Workspace.objects.all()
@@ -101,16 +104,11 @@ class WebhookEndpointView(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete']
 
 class WebhookReceiverView(APIView):
-    def post(self, request, workspace_id):
-        ws = get_object_or_404(Workspace, pk=workspace_id)
-        event_payload = request.data
-        print(f"Webhook received for workspace {workspace_id}: {event_payload}")
+    def post(self, request, token):
+        endpoint = get_object_or_404(WebhookEndpoint, token=token)
 
-        obj = {
-            "workspace_id" : workspace_id,
-            "event_type" : event_payload['action'],
-            "payload" : event_payload,
-        }
-        log_event_task(obj)
+        event_type = extract_event_type(request.data, endpoint.platform)
 
-        return Response("From view")
+        log_event_task(endpoint.workspace_id, request.data, event_type)
+
+        return Response("Received", status=status.HTTP_200_OK)
