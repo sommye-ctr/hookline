@@ -56,7 +56,6 @@ class ExecutionLog(models.Model):
     SKIPPED = "SK"
     RETRY_SCHEDULED = "RS"
     RETRY_FAILED = "RF"
-    VALIDATION_FAILED = "VF"
     INTERNAL_ERROR = "IE"
 
     STATUS_CHOICES = [
@@ -68,7 +67,6 @@ class ExecutionLog(models.Model):
         (SKIPPED, 'Action skipped'),
         (RETRY_SCHEDULED, 'Retry scheduled'),
         (RETRY_FAILED, 'Retry failed'),
-        (VALIDATION_FAILED, 'Validation failed'),
         (INTERNAL_ERROR, 'Internal error'),
     ]
 
