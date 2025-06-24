@@ -5,7 +5,6 @@ class ApiVersionMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        print("Called here")
         version_match = re.search(r'/api/v(\d+)', request.path)
         version = version_match.group(1) if version_match else '1'
 
@@ -13,5 +12,4 @@ class ApiVersionMiddleware:
 
         response = self.get_response(request)
         response['X-API-Version'] = version
-        print(response.headers)
         return response

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from workflows.models import Workspace, Trigger, Action, Workflow, ExecutionLog
+from workflows.models import Workspace, Trigger, Action, Workflow, ExecutionLog, WebhookEndpoint
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -112,3 +112,15 @@ class ExecutionLogListSerializer(serializers.ModelSerializer):
             'id', 'workflow', 'workflow_name', 'timestamp', 'status', 'status_display'
         ]
         read_only_fields = ['id', 'timestamp']
+
+class WebhookEndpointSerializer(serializers.ModelSerializer):
+    workspace = WorkspaceListSerializer(read_only=True)
+    workspace_id = serializers.PrimaryKeyRelatedField(
+        queryset=Workspace.objects.all(),
+        source="workspace",
+        write_only=True
+    )
+    #TODO - Look for token encryption
+    class Meta:
+        model = WebhookEndpoint
+        fields = ['workspace', 'workspace_id', 'platform', 'token', 'date_created']

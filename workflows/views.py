@@ -2,9 +2,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins
 from rest_framework.views import APIView, Response
 
-from workflows.models import Workspace, Workflow, Trigger, Action, ExecutionLog
+from workflows.models import Workspace, Workflow, Trigger, Action, ExecutionLog, WebhookEndpoint
 from workflows.serializers import WorkspaceListSerializer, WorkspaceSerializer, WorkflowListSerializer, \
-    WorkflowSerializer, TriggerSerializer, ActionSerializer, ExecutionLogSerializer, ExecutionLogListSerializer
+    WorkflowSerializer, TriggerSerializer, ActionSerializer, ExecutionLogSerializer, ExecutionLogListSerializer, \
+    WebhookEndpointSerializer
 from .tasks import log_event_task
 
 class WorkspaceView(viewsets.ModelViewSet):
@@ -94,8 +95,12 @@ class WorkflowExecutionLogsView(mixins.ListModelMixin, viewsets.GenericViewSet):
         wf = get_object_or_404(Workflow, pk=self.kwargs['workflow_pk'])
         return ExecutionLog.objects.filter(workflow=wf)
 
-class WebhookReceiverView(APIView):
+class WebhookEndpointView(viewsets.ModelViewSet):
+    queryset = WebhookEndpoint.objects.all()
+    serializer_class = WebhookEndpointSerializer
+    http_method_names = ['get', 'post', 'delete']
 
+class WebhookReceiverView(APIView):
     def post(self, request, workspace_id):
         ws = get_object_or_404(Workspace, pk=workspace_id)
         event_payload = request.data
@@ -109,5 +114,3 @@ class WebhookReceiverView(APIView):
         log_event_task(obj)
 
         return Response("From view")
-
-
