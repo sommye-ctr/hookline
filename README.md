@@ -46,7 +46,7 @@ This file represents the basic information and configuration schema of the plugi
 
 - **`slug`** - A snake_case representation of the plugin name
 - **`version`** - A single decimal version number (e.g., "1.0", "1.3", "2.1") used to manage plugin upgrades
-- **`config_schema`** - Defines the configuration form displayed when users install the plugin
+- **`config_schema`** - Defines the configuration form displayed when users select the plugin for an action
 
 ### Configuration Schema Fields
 
