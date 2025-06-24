@@ -1,22 +1,27 @@
-# Plugins Definition
+# Plugin Definition Guide
 
-### The plugins are required to declare
-- config.json
-- execution.py which contains execute() function
+## Overview
 
-***
-### config.json - 
-It represents the basic information of the plugin.
+Plugins are required to declare two essential files:
+- `config.json` - Plugin metadata and configuration schema
+- `execution.py` - Contains the main `execute()` function
 
-A sample `config.json` looks like:
+---
+
+## config.json
+
+This file represents the basic information and configuration schema of the plugin.
+
+### Sample config.json
 
 ```json
 {
   "name": "Email Sender",
+  "slug": "email_sender",
   "description": "Sends an email notification to a specified address.",
   "version": "1.0",
   "author": "Hookline",
-  "icon" : "<url to image asset>",
+  "icon": "<url to image asset>",
   "config_schema": {
     "to": {
       "type": "string",
@@ -37,64 +42,167 @@ A sample `config.json` looks like:
 }
 ```
 
-`version` - A float number, used to manage upgrades of plugins
+### Field Descriptions
 
-`config_schema` - Renders a form whenever a user tries to 
-install the plugin. The data which is required by the plugin 
-for its functioning can be declared here. 
+- **`slug`** - A snake_case representation of the plugin name
+- **`version`** - A single decimal version number (e.g., "1.0", "1.3", "2.1") used to manage plugin upgrades
+- **`config_schema`** - Defines the configuration form displayed when users install the plugin
 
-The `type` is the datatype of the field, `required` marks the field
-mandatory and `description` is shown to the user as help text when
-filling the form
+### Configuration Schema Fields
 
-Supported `type` for the fields are:
-1. string
-2. integer
-3. float
-4. bool
+Each field in `config_schema` supports the following properties:
 
-> After updating either of the `config.json` or the `execution.py`
-you will need to update the version number. Whenever the system 
-detects an increment in the version it will show an option to 
-update the plugin to the user.
+- **`type`** - The data type of the field
+- **`required`** - Boolean indicating if the field is mandatory
+- **`description`** - Help text shown to users when filling the form
 
-***
-### execution.py
+### Supported Data Types
 
-Should contain `execute(payload:dict, config:dict)` which is where
-the logic of the plugin reside. The function is called with following
-arguments
-1. `payload` - The payload received from the third-party platform
-which caused the workflow to fire up
-2. `config` - The user set configuration for the plugin as described
-in the 'config_schema' of the `config.json`
+1. `string`
+2. `integer`
+3. `float`
+4. `boolean`
 
-The `config` object for the above plugin should look like:
+### Version Management
+
+After updating either `config.json` or `execution.py`, you must increment the version number. When the system detects a version increment, it will prompt users with an option to update the plugin.
+
+---
+
+## execution.py
+
+This file must contain an `execute(payload: dict, config: dict)` function where the plugin's main logic resides.
+
+### Function Parameters
+
+1. **`payload`** - The payload received from the third-party platform that triggered the workflow
+2. **`config`** - The user-configured settings for the plugin as defined in `config_schema`
+
+### Sample Configuration Object
+
+For the email sender plugin above, the config object would look like:
+
 ```json
 {
-  "to" : "someone@domain.com",
-  "subject" : "This is a subject",
-  "body" : "This is a body"
+  "to": "someone@domain.com",
+  "subject": "This is a subject",
+  "body": "This is a body"
 }
 ```
 
-> A time limit of **60** seconds is given to each plugin for
-> executing all its operation and return the required data. 
-> The request is terminated after the given time frame.
+### Execution Constraints
 
-***
-### Returning Data
+- **Time limit**: 60 seconds maximum execution time per plugin
+- **Timeout behavior**: Requests are automatically terminated after the time limit
 
-The system expects a dict to be returned by the `execute` function.
-A sample should look like
+---
+
+## Return Value Requirements
+
+The `execute` function must return a dictionary with the following structure:
 
 ```json
 {
   "status": "success" | "failed",
-  "message": "What happened",
-  "output": { ... }  # Optional plugin-specific output
+  "message": "Description of what happened",
+  "status_code": 200,    // HTTP status code (required)
+  "output": { ... }      // Optional: plugin-specific output data
 }
 ```
-The `message` and `output` is used for logging purposes and is
-visible in logs for that specific workflow.
 
+### Return Fields
+
+- **`status`** - Either "success" or "failed" (required)
+- **`message`** - Human-readable description of the execution result (required)
+- **`status_code`** - HTTP status code indicating the result type (required)
+  - `200` - Success
+  - `400` - Bad Request (validation error, invalid input)
+  - `401` - Unauthorized (authentication failure)
+  - `403` - Forbidden (insufficient permissions)
+  - `404` - Not Found (resource not found)
+  - `408` - Request Timeout (execution timeout)
+  - `422` - Unprocessable Entity (invalid data format)
+  - `429` - Too Many Requests (rate limit exceeded)
+  - `500` - Internal Server Error (unexpected plugin error)
+  - `502` - Bad Gateway (external service error)
+  - `503` - Service Unavailable (external service unavailable)
+  - `504` - Gateway Timeout (external service timeout)
+- **`output`** - Optional dictionary containing plugin-specific output data
+
+The `message` and `output` fields are used for logging purposes and are visible in the workflow logs.
+
+---
+
+## Example Implementation
+
+Here's a complete example of a plugin's `execute` function:
+
+```python
+def execute(payload: dict, config: dict) -> dict:
+    try:
+        # Plugin logic here
+        result = send_email(
+            to=config['to'],
+            subject=config['subject'],
+            body=config['body']
+        )
+        
+        return {
+            "status": "success",
+            "message": "Email sent successfully",
+            "status_code": 200,
+            "output": {
+                "email_id": result.get('id'),
+                "sent_at": result.get('timestamp')
+            }
+        }
+    
+    except ValidationError as e:
+        return {
+            "status": "failed",
+            "message": f"Validation error: {str(e)}",
+            "status_code": 400,
+            "output": None
+        }
+    
+    except TimeoutError:
+        return {
+            "status": "failed",
+            "message": "Request timed out",
+            "status_code": 408,
+            "output": None
+        }
+    
+    except Exception as e:
+        return {
+            "status": "failed",
+            "message": f"Unexpected error: {str(e)}",
+            "status_code": 500,
+            "output": None
+        }
+```
+
+### Example Response Formats
+
+Success response:
+```json
+{
+  "status": "success",
+  "message": "Email sent successfully",
+  "status_code": 200,
+  "output": {
+    "email_id": "msg_12345",
+    "sent_at": "2025-06-24T10:30:00Z"
+  }
+}
+```
+
+Error response:
+```json
+{
+  "status": "failed",
+  "message": "Invalid email address format",
+  "status_code": 400,
+  "output": null
+}
+```
