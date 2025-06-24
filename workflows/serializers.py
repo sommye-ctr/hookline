@@ -38,6 +38,7 @@ class WorkspaceListSerializer(serializers.ModelSerializer):
         return obj.workflows.count()
 
 class TriggerSerializer(serializers.ModelSerializer):
+    #TODO - Add validation for config - it should be a list of json objects
     class Meta:
         model = Trigger
         fields = "__all__"
