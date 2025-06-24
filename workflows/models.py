@@ -77,7 +77,7 @@ class ExecutionLog(models.Model):
     details = models.JSONField(default=dict)
 
     def __str__(self):
-        return self.id.__str__()
+        return self.status
 
 class WebhookEndpoint(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

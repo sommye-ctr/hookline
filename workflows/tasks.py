@@ -1,6 +1,7 @@
 from celery import shared_task
+from rest_framework.generics import get_object_or_404
 
-from workflows.models import ExecutionLog, Workflow
+from workflows.models import ExecutionLog, Workflow, Action
 from workflows.trigger_registry import TriggerMatcher
 from workflows.utils import get_log_details_for_action, load_action_plugin
 
@@ -50,11 +51,15 @@ def execute_actions(action_id, workflow_id, payload):
         status=ExecutionLog.ACTION_STARTED
     )
 
-    #TODO - Error handling in here and remove this sample call
-    execute = load_action_plugin("email_sender")
-    execute(payload, {"to" : "someone@gmail.com"})
+    #TODO - Error handling in here
+    try:
+        action = get_object_or_404(Action, pk=action_id)
+        execute = load_action_plugin(action.type)
+        execute(payload, action.config)
+    except Exception as e:
+        ExecutionLog.objects.create(workflow_id=workflow_id, status=ExecutionLog.INTERNAL_ERROR)
+        logger.exception(e)
 
-    print(f'{workflow_id}: {action_id} - Action executing...')
     ExecutionLog.objects.create(
         workflow_id=workflow_id,
         status=ExecutionLog.ACTION_COMPLETED
