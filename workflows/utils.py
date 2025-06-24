@@ -36,9 +36,29 @@ def get_log_details_for_action(action):
         "action" : action.type
     }
 
-def load_action_plugin(slug):
+def load_action_plugin(slug:str):
     some_dir = os.path.join(settings.BASE_DIR, 'plugins', slug)
+
+    if not os.path.exists(some_dir):
+        raise FileNotFoundError("Plugin could not be found")
+    if not os.path.isdir(some_dir):
+        raise NotADirectoryError("The plugin doesnt have correct configuration")
+
+    execution_file = os.path.join(some_dir, 'execution.py')
+    if not os.path.exists(execution_file):
+        raise FileNotFoundError("The execution.py was not found for the plugin")
+
     sys.path.append(some_dir)
 
-    module = importlib.import_module("execution")
-    return module.execute
+    try:
+        module = importlib.import_module("execution")
+
+        if not hasattr(module, "execute") or not callable(module.execute):
+            raise AttributeError("Plugin doesnt have execute function")
+
+        return module.execute
+    except ImportError:
+        raise ImportError("Unable to import the plugin")
+    finally:
+        if some_dir in sys.path:
+            sys.path.remove(some_dir)
