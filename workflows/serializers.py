@@ -10,6 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
         read_only_fields = ['id']
 
+
 class WorkspaceSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
     owner_id = serializers.PrimaryKeyRelatedField(
@@ -18,6 +19,7 @@ class WorkspaceSerializer(serializers.ModelSerializer):
         write_only=True
     )
     workflows_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Workspace
         fields = ['id', 'name', 'owner', 'owner_id', 'workflows_count', 'date_created', 'date_updated']
@@ -25,6 +27,8 @@ class WorkspaceSerializer(serializers.ModelSerializer):
 
     def get_workflows_count(self, workspace):
         return workspace.workflows.count()
+
+
 class WorkspaceListSerializer(serializers.ModelSerializer):
     owner = serializers.StringRelatedField()
     workflows_count = serializers.SerializerMethodField()
@@ -37,11 +41,21 @@ class WorkspaceListSerializer(serializers.ModelSerializer):
     def get_workflows_count(self, obj):
         return obj.workflows.count()
 
+
 class TriggerSerializer(serializers.ModelSerializer):
-    #TODO - Add validation for config - it should be a list of json objects
     class Meta:
         model = Trigger
         fields = "__all__"
+
+    def validate_config(self, config):
+        if not isinstance(config, list):
+            raise serializers.ValidationError("Config must be list of json objects")
+
+        for item in config:
+            if not isinstance(item, dict):
+                raise serializers.ValidationError("Config item must be a valid json object")
+            if not any(hasattr(item, attr) for attr in ['field', 'value']):
+                raise serializers.ValidationError("Config item must have field & value attribute")
 
 class ActionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,6 +66,7 @@ class ActionSerializer(serializers.ModelSerializer):
         if value < 1:
             raise serializers.ValidationError("Order must be greater than 0")
         return value
+
 
 class WorkflowListSerializer(serializers.ModelSerializer):
     workspace_name = serializers.CharField(source='workspace.name', read_only=True)
@@ -71,9 +86,11 @@ class WorkflowListSerializer(serializers.ModelSerializer):
 
     def get_actions_count(self, obj):
         return obj.actions.count()
+
+
 class WorkflowSerializer(serializers.ModelSerializer):
     workspace = WorkspaceListSerializer(read_only=True)
-    #workspace_id = serializers.UUIDField(write_only=True)
+    # workspace_id = serializers.UUIDField(write_only=True)
     triggers = TriggerSerializer(many=True, read_only=True)
     actions = ActionSerializer(many=True, read_only=True)
     recent_logs = serializers.SerializerMethodField()
@@ -91,6 +108,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
         recent_logs = obj.logs.order_by('-timestamp')[:10]
         return ExecutionLogSerializer(recent_logs, many=True).data
 
+
 class ExecutionLogSerializer(serializers.ModelSerializer):
     workflow_name = serializers.CharField(source='workflow.name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
@@ -102,6 +120,8 @@ class ExecutionLogSerializer(serializers.ModelSerializer):
             'status', 'status_display', 'details'
         ]
         read_only_fields = ['id', 'timestamp']
+
+
 class ExecutionLogListSerializer(serializers.ModelSerializer):
     workflow_name = serializers.CharField(source='workflow.name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
@@ -113,6 +133,7 @@ class ExecutionLogListSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'timestamp']
 
+
 class WebhookEndpointSerializer(serializers.ModelSerializer):
     workspace = WorkspaceListSerializer(read_only=True)
     workspace_id = serializers.PrimaryKeyRelatedField(
@@ -120,7 +141,8 @@ class WebhookEndpointSerializer(serializers.ModelSerializer):
         source="workspace",
         write_only=True
     )
-    #TODO - Look for token encryption
+
+    # TODO - Look for token encryption
     class Meta:
         model = WebhookEndpoint
         fields = ['workspace', 'workspace_id', 'platform', 'token', 'date_created']
