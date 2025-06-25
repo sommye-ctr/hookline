@@ -22,5 +22,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include(workspace_router.urls)),
     path('', include(workflow_router.urls)),
-    path('webhooks/<token>/ingest', views.WebhookReceiverView.as_view(), name='webhook-ingest')
+    path('webhooks/<token>/ingest', views.WebhookReceiverView.as_view(), name='webhook-ingest'),
+    path('plugins/', views.PluginsView.as_view(), name="plugins")
 ]

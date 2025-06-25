@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 
@@ -35,6 +36,16 @@ def get_log_details_for_action(action):
     return {
         "action" : action.type
     }
+
+def load_json_file(path):
+    file = os.path.join(settings.BASE_DIR, path)
+    if not os.path.exists(file):
+        raise FileNotFoundError()
+
+    with open(file, 'r') as f:
+        data = json.load(f)
+    return data
+
 
 def load_action_plugin(slug:str):
     some_dir = os.path.join(settings.BASE_DIR, 'plugins', slug)

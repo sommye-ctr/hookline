@@ -7,7 +7,7 @@ from workflows.serializers import WorkspaceListSerializer, WorkspaceSerializer, 
     WorkflowSerializer, TriggerSerializer, ActionSerializer, ExecutionLogSerializer, ExecutionLogListSerializer, \
     WebhookEndpointSerializer
 from .tasks import log_event_task
-from .utils import extract_event_type
+from .utils import extract_event_type, load_json_file
 
 
 class WorkspaceView(viewsets.ModelViewSet):
@@ -109,3 +109,13 @@ class WebhookReceiverView(APIView):
         event_type = extract_event_type(request.data, endpoint.platform)
         log_event_task(endpoint.workspace_id, request.data, event_type)
         return Response("Received", status=status.HTTP_200_OK)
+
+class PluginsView(APIView):
+    def get(self, request):
+        try:
+            plugins = load_json_file("plugins/register.json")
+        except FileNotFoundError:
+            return Response("Could not find plugins registry", status=status.HTTP_404_NOT_FOUND)
+
+        return Response(plugins, status=status.HTTP_200_OK)
+
