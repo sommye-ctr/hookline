@@ -20,7 +20,7 @@ class TriggerMatcher:
                     for obj in tr.config:
                         value = get_nested_value(self.payload, obj['field'])
                         if value == obj['equals']:
-                            return wf.id
+                            return wf.id, tr.id
                         else:
                             break
         return None

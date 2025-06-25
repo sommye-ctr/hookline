@@ -53,10 +53,10 @@ class ExecutionLog(models.Model):
     ACTION_STARTED = "AS"
     ACTION_COMPLETED = "AC"
     ACTION_FAILED = "AF"
-    SKIPPED = "SK"
     RETRY_SCHEDULED = "RS"
     RETRY_FAILED = "RF"
     INTERNAL_ERROR = "IE"
+    PLUGIN_PROTOCOL_ERROR = "PP"
 
     STATUS_CHOICES = [
         (TRIGGER_MATCHED, 'Trigger matched'),
@@ -64,10 +64,10 @@ class ExecutionLog(models.Model):
         (ACTION_STARTED, 'Action execution started'),
         (ACTION_COMPLETED, 'Action completed'),
         (ACTION_FAILED, 'Action failed'),
-        (SKIPPED, 'Action skipped'),
         (RETRY_SCHEDULED, 'Retry scheduled'),
         (RETRY_FAILED, 'Retry failed'),
         (INTERNAL_ERROR, 'Internal error'),
+        (PLUGIN_PROTOCOL_ERROR, "Plugin Protocol error"),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -78,6 +78,15 @@ class ExecutionLog(models.Model):
 
     def __str__(self):
         return self.status
+
+    @staticmethod
+    def log_entry(workflow_id:uuid.UUID, status, detail:dict):
+        ExecutionLog.objects.create(
+            workflow_id=workflow_id,
+            status=status,
+            details=detail
+        )
+
 
 class WebhookEndpoint(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
