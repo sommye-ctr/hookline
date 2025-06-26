@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from workflows.models import Workspace, Trigger, Action, Workflow, ExecutionLog, WebhookEndpoint
+from workflows.models import Workspace, Trigger, Action, Workflow, ExecutionLog, WebhookEndpoint, InstalledPlugin
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -56,6 +56,7 @@ class TriggerSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Config item must be a valid json object")
             if not any(hasattr(item, attr) for attr in ['field', 'value']):
                 raise serializers.ValidationError("Config item must have field & value attribute")
+
 
 class ActionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -146,3 +147,23 @@ class WebhookEndpointSerializer(serializers.ModelSerializer):
     class Meta:
         model = WebhookEndpoint
         fields = ['workspace', 'workspace_id', 'platform', 'token', 'date_created']
+
+
+class InstalledPluginListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InstalledPlugin
+        fields = ["slug", "name", "version", "icon"]
+
+class InstalledPluginSerializer(serializers.ModelSerializer):
+    installed_by = UserSerializer(read_only=True)
+    name = serializers.CharField(read_only=True)
+    version = serializers.CharField(read_only=True)
+    description = serializers.CharField(read_only=True)
+    author = serializers.CharField(read_only=True)
+    icon = serializers.CharField(read_only=True)
+    user_config = serializers.JSONField(read_only=True)
+
+    class Meta:
+        model = InstalledPlugin
+        fields = ["slug", "name", "version", "icon", "version", "description",
+                  "author", "user_config", "installed_by"]

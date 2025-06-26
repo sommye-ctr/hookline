@@ -12,6 +12,7 @@ router.register("webhook-endpoints", views.WebhookEndpointView)
 
 workspace_router = routers.NestedDefaultRouter(router, "workspaces", lookup='workspace')
 workspace_router.register("workflows", views.WorkspaceWorkflowView, basename="workspace-workflow")
+workspace_router.register("installed-plugins", views.InstalledPluginsView, basename="installed-plugins")
 
 workflow_router = routers.NestedDefaultRouter(router, "workflows", lookup="workflow")
 workflow_router.register("triggers", views.WorkflowTriggerView, basename="workflow-trigger")
