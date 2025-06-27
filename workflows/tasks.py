@@ -103,7 +103,7 @@ def execute_actions(self, action_data, workflow_id, payload, workspace_id):
         logger.error(f"There was error while deserializing the action", action_data, e)
         execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, action=action_data, error=e.error_dict)
         raise
-    except (FileNotFoundError, NotADirectoryError, FileNotFoundError, ImportError) as e:
+    except (FileNotFoundError, NotADirectoryError, ImportError) as e:
         logger.error(f"There was an error in the plugin", action_data, e)
         execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, action=action_data, error=e,
                       message=f"There was an error in loading plugin {action_data['type']}")

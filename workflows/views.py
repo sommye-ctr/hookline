@@ -1,6 +1,9 @@
+from django.core.serializers import serialize
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins, status
+from rest_framework.decorators import action
 from rest_framework.views import APIView, Response
+from packaging.version import parse as parse_version, InvalidVersion
 
 from workflows.models import Workspace, Workflow, Trigger, Action, ExecutionLog, WebhookEndpoint, InstalledPlugin
 from workflows.serializers import WorkspaceListSerializer, WorkspaceSerializer, WorkflowListSerializer, \
@@ -139,20 +142,45 @@ class InstalledPluginsView(mixins.ListModelMixin, mixins.CreateModelMixin, mixin
         else:
             return InstalledPluginSerializer
 
-    # TODO - Handle the update of plugins
-    def create(self, request, *args, **kwargs):
-        ws = self.kwargs['workspace_pk']
-        slug = request.data['slug']
-
+    def _get_plugin(self, slug: str):
         try:
-            plugins: list = load_json_file("plugins/register.json")
+            plugins = load_json_file("plugins/register.json")
         except FileNotFoundError:
             return Response("There was an error while fetching plugins", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         plugin = [x for x in plugins if x['slug'] == slug]
         if len(plugin) < 1:
             return Response(f"Plugin {slug} not found", status=status.HTTP_404_NOT_FOUND)
+        return plugin[0]
+-
+    def create(self, request, *args, **kwargs):
+        ws = self.kwargs['workspace_pk']
+        slug = request.data['slug']
 
-        installed = InstalledPlugin.objects.create(workspace_id=ws, **plugin[0])
+        plugin = self._get_plugin(slug)
+        installed = InstalledPlugin.objects.create(workspace_id=ws, **plugin)
         obj = InstalledPluginSerializer(installed)
         return Response(obj.data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['put'], detail=True, url_path="update")
+    def update_plugin(self, request, *args, **kwargs):
+        slug = request.data.get("slug")
+        if not slug:
+            return Response("Slug is a required field", status=status.HTTP_400_BAD_REQUEST)
+
+        instance: InstalledPlugin = self.get_object()
+        plugin = self._get_plugin(slug)
+
+        try:
+            installed_ver = parse_version(instance.version)
+            current_ver = parse_version(plugin['version'])
+        except InvalidVersion:
+            return Response(f"There was an error with the versioning of the plugin",
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if installed_ver < current_ver:
+            instance.version = plugin['version']
+            instance.save()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_304_NOT_MODIFIED)

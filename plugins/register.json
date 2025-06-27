@@ -3,7 +3,7 @@
     "name": "Email Sender",
     "slug": "email_sender",
     "description": "Sends an email notification to a specified address.",
-    "version": "1.0",
+    "version": "1.0.1",
     "author": "Hookline",
     "icon": "https://cdn-icons-png.flaticon.com/512/9916/9916040.png",
     "config_schema": {
