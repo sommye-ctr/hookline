@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.fields import UUIDField
 
 from workflows.utils import generate_webhook_token
 
@@ -44,7 +45,7 @@ class Action(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workflow = models.ForeignKey(to=Workflow, on_delete=models.CASCADE, related_name="actions")
     type = models.CharField(max_length=255)
-    config = models.JSONField() # TODO - db validator to prevent incorrect config
+    config = models.JSONField()  # TODO - db validator to prevent incorrect config
     order = models.PositiveIntegerField()
 
     def __str__(self):
@@ -104,6 +105,7 @@ class WebhookEndpoint(models.Model):
 
 
 class InstalledPlugin(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE, related_name="installed_plugins",
                                   editable=False)
     slug = models.CharField(max_length=100)
@@ -112,7 +114,7 @@ class InstalledPlugin(models.Model):
     description = models.TextField()
     author = models.CharField(max_length=200)
     icon = models.TextField()
-    config_schema = models.JSONField()
+    config_schema = models.JSONField(null=True)
     installed_at = models.DateTimeField(auto_now_add=True, editable=False)
     installed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
 

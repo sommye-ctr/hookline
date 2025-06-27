@@ -139,4 +139,20 @@ class InstalledPluginsView(mixins.ListModelMixin, mixins.CreateModelMixin, mixin
         else:
             return InstalledPluginSerializer
 
-    # TODO - Handle the installation + update of plugins
+    # TODO - Handle the update of plugins
+    def create(self, request, *args, **kwargs):
+        ws = self.kwargs['workspace_pk']
+        slug = request.data['slug']
+
+        try:
+            plugins: list = load_json_file("plugins/register.json")
+        except FileNotFoundError:
+            return Response("There was an error while fetching plugins", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        plugin = [x for x in plugins if x['slug'] == slug]
+        if len(plugin) < 1:
+            return Response(f"Plugin {slug} not found", status=status.HTTP_404_NOT_FOUND)
+
+        installed = InstalledPlugin.objects.create(workspace_id=ws, **plugin[0])
+        obj = InstalledPluginSerializer(installed)
+        return Response(obj.data, status=status.HTTP_201_CREATED)

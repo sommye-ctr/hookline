@@ -168,7 +168,7 @@ class WebhookEndpointSerializer(serializers.ModelSerializer):
 class InstalledPluginListSerializer(serializers.ModelSerializer):
     class Meta:
         model = InstalledPlugin
-        fields = ["slug", "name", "version", "icon"]
+        fields = ["id", "slug", "name", "version", "icon"]
 
 
 class InstalledPluginSerializer(serializers.ModelSerializer):

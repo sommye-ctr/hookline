@@ -5,6 +5,23 @@
     "description": "Sends an email notification to a specified address.",
     "version": "1.0",
     "author": "Hookline",
-    "icon": "https://cdn-icons-png.flaticon.com/512/9916/9916040.png"
+    "icon": "https://cdn-icons-png.flaticon.com/512/9916/9916040.png",
+    "config_schema": {
+      "to": {
+        "type": "string",
+        "required": true,
+        "description": "Recipient email address"
+      },
+      "subject": {
+        "type": "string",
+        "required": true,
+        "description": "Email subject"
+      },
+      "body": {
+        "type": "string",
+        "required": true,
+        "description": "Body of the email. You can use variables like {task_id} or {event_type}"
+      }
+    }
   }
 ]
