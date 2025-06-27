@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import traceback
 
 from django.conf import settings
 from django.utils.crypto import get_random_string
@@ -36,9 +37,11 @@ def extract_event_type(payload, platform):
         raise ValueError(f"Unknown platform: {platform}")
 
 
-def get_log_details_for_action(action):
+def get_error_dict(e: Exception, **kwargs):
     return {
-        "action": action.type
+        "message": kwargs.get("message", None),
+        "error": f"{type(e).__name__}: {str(e)}",
+        "traceback": traceback.format_exc()
     }
 
 

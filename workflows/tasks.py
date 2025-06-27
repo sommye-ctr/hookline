@@ -5,7 +5,7 @@ from hookline_sdk.registry import HooklinePlugin
 from workflows.models import ExecutionLog, Workflow, Trigger, InstalledPlugin
 from workflows.serializers import TriggerSerializer, ActionSerializer
 from workflows.trigger_registry import TriggerMatcher
-from workflows.utils import load_action_plugin
+from workflows.utils import load_action_plugin, get_error_dict
 
 import logging
 import environ
@@ -54,7 +54,7 @@ def log_event_task(workspace_id, payload, event_type):
 
         except (Trigger.DoesNotExist, Workflow.DoesNotExist) as e:
             logger.error("Something went wrong with trigger registry")
-            execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, error=e)
+            execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, **get_error_dict(e))
             raise
 
     except Exception as e:
@@ -105,8 +105,12 @@ def execute_actions(self, action_data, workflow_id, payload, workspace_id):
         raise
     except (FileNotFoundError, NotADirectoryError, ImportError) as e:
         logger.error(f"There was an error in the plugin", action_data, e)
-        execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, action=action_data, error=e,
-                      message=f"There was an error in loading plugin {action_data['type']}")
+        execution_log(
+            workflow_id,
+            ExecutionLog.INTERNAL_ERROR,
+            action=action_data,
+            **get_error_dict(e, message=f"There was an error in loading plugin {action_data['type']}"),
+        )
         raise
     except AttributeError as e:
         logger.error(e)
@@ -115,13 +119,13 @@ def execute_actions(self, action_data, workflow_id, payload, workspace_id):
         raise
     except Exception as e:
         logger.error("Unknown error", e)
-        execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, action=action_data, error=e)
+        execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, action=action_data, **get_error_dict(e))
 
         if self.request.retries < max_retries:
             logger.debug("Retrying action...", action_data)
-            execution_log(workflow_id, ExecutionLog.RETRY_SCHEDULED, action=action_data, reason=e,
+            execution_log(workflow_id, ExecutionLog.RETRY_SCHEDULED, action=action_data, reason=get_error_dict(e),
                           retry_count=self.request.retries)
             raise self.retry(exc=e)
         else:
-            execution_log(workflow_id, ExecutionLog.RETRY_FAILED, action=action_data, reason=e,
+            execution_log(workflow_id, ExecutionLog.RETRY_FAILED, action=action_data, reason=get_error_dict(e),
                           retry_count=self.request.retries)
