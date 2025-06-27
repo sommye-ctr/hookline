@@ -81,12 +81,12 @@ def execute_actions(self, action_data, workflow_id, payload, workspace_id):
             execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, action=action_data, message=err)
             return
 
-        plugin: HooklinePlugin = load_action_plugin(installed_p['version'])
+        plugin: HooklinePlugin = load_action_plugin(action['type'])(installed_p[1])
         output = plugin.start(payload, action['config'])
 
         if (not isinstance(output, dict)
-                or not any(hasattr(output, attr) for attr in ['message', 'status', 'status_code'])):
-            logger.error("Plugin returned malformed response!")
+                or not all(key in output for key in ['message', 'status', 'status_code'])):
+            logger.error(f"Plugin returned malformed response! with output {output}")
             execution_log(workflow_id, ExecutionLog.PLUGIN_PROTOCOL_ERROR, action=action_data, plugin_output=output,
                           message="The plugin returned malformed response")
             return

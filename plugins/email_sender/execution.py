@@ -4,7 +4,7 @@ from hookline_sdk.registry import HooklinePlugin
 
 class EmailPlugin(HooklinePlugin):
 
-    @plugin_version("1.0.0")
+    @plugin_version("1.0")
     def execute(self, payload: dict, config: dict):
         print(f"Sending mail to {config.get("to")}")
 
