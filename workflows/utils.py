@@ -7,8 +7,6 @@ from django.utils.crypto import get_random_string
 import environ
 import importlib
 
-from workflows.models import ExecutionLog
-
 env = environ.Env()
 
 
@@ -42,14 +40,6 @@ def get_log_details_for_action(action):
     return {
         "action": action.type
     }
-
-
-def execution_log(workflow_id, status, **kwargs):
-    ExecutionLog.objects.create(
-        workflow_id=workflow_id,
-        status=status,
-        detail=kwargs
-    )
 
 
 def load_json_file(path):

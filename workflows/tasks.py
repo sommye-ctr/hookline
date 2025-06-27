@@ -5,7 +5,7 @@ from hookline_sdk.registry import HooklinePlugin
 from workflows.models import ExecutionLog, Workflow, Trigger, InstalledPlugin
 from workflows.serializers import TriggerSerializer, ActionSerializer
 from workflows.trigger_registry import TriggerMatcher
-from workflows.utils import load_action_plugin, execution_log
+from workflows.utils import load_action_plugin
 
 import logging
 import environ
@@ -13,6 +13,14 @@ import environ
 logger = logging.getLogger(__name__)
 env = environ.Env()
 max_retries = int(env('ACTION_MAX_RETRIES'))
+
+
+def execution_log(workflow_id, status, **kwargs):
+    ExecutionLog.objects.create(
+        workflow_id=workflow_id,
+        status=status,
+        detail=kwargs
+    )
 
 
 @shared_task
