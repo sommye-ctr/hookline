@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from packaging.version import parse as parse_version, InvalidVersion
+from packaging.version import parse as parse_version
 
 from workflows.models import Workspace, Trigger, Action, Workflow, ExecutionLog, WebhookEndpoint, InstalledPlugin
 
