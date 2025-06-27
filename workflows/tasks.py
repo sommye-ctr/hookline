@@ -16,7 +16,7 @@ max_retries = int(env('ACTION_MAX_RETRIES'))
 
 
 def execution_log(workflow_id, status, **kwargs):
-    ExecutionLog.objects.create(
+    ExecutionLog.log_entry(
         workflow_id=workflow_id,
         status=status,
         detail=kwargs
@@ -52,7 +52,7 @@ def log_event_task(workspace_id, payload, event_type):
                 execution_log(workflow_id, ExecutionLog.ACTION_ENQUEUED, action=action_data, triggered_by=trigger_id,
                               event_type=event_type)
 
-        except Trigger.DoesNotExist | Workflow.DoesNotExist as e:
+        except (Trigger.DoesNotExist, Workflow.DoesNotExist) as e:
             logger.error("Something went wrong with trigger registry")
             execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, error=e)
             raise
@@ -71,18 +71,18 @@ def execute_actions(self, action_data, workflow_id, payload, workspace_id):
     try:
         action = ActionSerializer(data=action_data)
         action.is_valid(raise_exception=True)
-        action = action.save(commit=False)
+        action = action.validated_data
 
-        installed_p = (InstalledPlugin.objects.filter(workspace_id=workspace_id, slug=action.type)
+        installed_p = (InstalledPlugin.objects.filter(workspace_id=workspace_id, slug=action['type'])
                        .values_list("slug", "version").first())
         if installed_p is None:
-            err = f"The plugin is not installed for action {action.type}"
+            err = f"The plugin is not installed for action {action['type']}"
             logger.error(err)
             execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, action=action_data, message=err)
             return
 
         plugin: HooklinePlugin = load_action_plugin(installed_p['version'])
-        output = plugin.start(payload, action.config)
+        output = plugin.start(payload, action['config'])
 
         if (not isinstance(output, dict)
                 or not any(hasattr(output, attr) for attr in ['message', 'status', 'status_code'])):

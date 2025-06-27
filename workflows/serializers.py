@@ -3,6 +3,20 @@ from rest_framework import serializers
 
 from workflows.models import Workspace, Trigger, Action, Workflow, ExecutionLog, WebhookEndpoint, InstalledPlugin
 
+from json import JSONEncoder
+from uuid import UUID
+
+old_default = JSONEncoder.default
+
+
+def new_default(self, obj):
+    if isinstance(obj, UUID):
+        return str(obj)
+    return old_default(self, obj)
+
+
+JSONEncoder.default = new_default
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -43,6 +57,8 @@ class WorkspaceListSerializer(serializers.ModelSerializer):
 
 
 class TriggerSerializer(serializers.ModelSerializer):
+    id = str()
+
     class Meta:
         model = Trigger
         fields = "__all__"
@@ -153,6 +169,7 @@ class InstalledPluginListSerializer(serializers.ModelSerializer):
     class Meta:
         model = InstalledPlugin
         fields = ["slug", "name", "version", "icon"]
+
 
 class InstalledPluginSerializer(serializers.ModelSerializer):
     installed_by = UserSerializer(read_only=True)

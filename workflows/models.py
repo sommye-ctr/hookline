@@ -44,7 +44,7 @@ class Action(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workflow = models.ForeignKey(to=Workflow, on_delete=models.CASCADE, related_name="actions")
     type = models.CharField(max_length=255)
-    config = models.JSONField()
+    config = models.JSONField() # TODO - db validator to prevent incorrect config
     order = models.PositiveIntegerField()
 
     def __str__(self):
@@ -113,7 +113,6 @@ class InstalledPlugin(models.Model):
     author = models.CharField(max_length=200)
     icon = models.TextField()
     config_schema = models.JSONField()
-    user_config = models.JSONField()  # TODO - db validator to prevent incorrect config
     installed_at = models.DateTimeField(auto_now_add=True, editable=False)
     installed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
 
