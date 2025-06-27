@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from .models import Workspace
 from .utils import get_nested_value
 
+
 class TriggerMatcher:
     def __init__(self, payload, workspace_id, event_type):
         self.payload = payload
@@ -24,4 +25,3 @@ class TriggerMatcher:
                         else:
                             break
         return None
-

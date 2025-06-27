@@ -7,13 +7,17 @@ from django.utils.crypto import get_random_string
 import environ
 import importlib
 
+from workflows.models import ExecutionLog
+
 env = environ.Env()
+
 
 def generate_webhook_token():
     return get_random_string(
         int(env('WEBHOOK_TOKEN_LENGTH')),
         allowed_chars=env('WEBHOOK_TOKEN_CHARACTERS')
     )
+
 
 def get_nested_value(data: dict, dotted_path: str, default=None):
     keys = dotted_path.split(".")
@@ -24,6 +28,7 @@ def get_nested_value(data: dict, dotted_path: str, default=None):
             return default
     return data
 
+
 def extract_event_type(payload, platform):
     if platform == 'Trello':
         return f"{payload.get('action', {}).get('type')}"
@@ -32,10 +37,20 @@ def extract_event_type(payload, platform):
     else:
         raise ValueError(f"Unknown platform: {platform}")
 
+
 def get_log_details_for_action(action):
     return {
-        "action" : action.type
+        "action": action.type
     }
+
+
+def execution_log(workflow_id, status, **kwargs):
+    ExecutionLog.objects.create(
+        workflow_id=workflow_id,
+        status=status,
+        detail=kwargs
+    )
+
 
 def load_json_file(path):
     file = os.path.join(settings.BASE_DIR, path)
@@ -47,7 +62,7 @@ def load_json_file(path):
     return data
 
 
-def load_action_plugin(slug:str):
+def load_action_plugin(slug: str) -> callable:
     some_dir = os.path.join(settings.BASE_DIR, 'plugins', slug)
 
     if not os.path.exists(some_dir):
@@ -64,10 +79,10 @@ def load_action_plugin(slug:str):
     try:
         module = importlib.import_module("execution")
 
-        if not hasattr(module, "execute") or not callable(module.execute):
-            raise AttributeError("Plugin doesnt have execute function")
+        if not hasattr(module, "create_plugin") or not callable(module.create_plugin):
+            raise AttributeError("Plugin doesnt have create_plugin function")
 
-        return module.execute
+        return module.create_plugin
     except ImportError:
         raise ImportError("Unable to import the plugin")
     finally:

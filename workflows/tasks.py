@@ -1,10 +1,11 @@
 from celery import shared_task
 from django.core.exceptions import ValidationError
+from hookline_sdk.registry import HooklinePlugin
 
-from workflows.models import ExecutionLog, Workflow, Trigger
+from workflows.models import ExecutionLog, Workflow, Trigger, InstalledPlugin
 from workflows.serializers import TriggerSerializer, ActionSerializer
 from workflows.trigger_registry import TriggerMatcher
-from workflows.utils import load_action_plugin
+from workflows.utils import load_action_plugin, execution_log
 
 import logging
 import environ
@@ -28,16 +29,8 @@ def log_event_task(workspace_id, payload, event_type):
         try:
             trigger = Trigger.objects.get(pk=trigger_id)
             wf = Workflow.objects.get(pk=workflow_id)
-
-            ExecutionLog.log_entry(
-                workflow_id=workflow_id,
-                status=ExecutionLog.TRIGGER_MATCHED,
-                detail={
-                    "payload": payload,
-                    "event_type": event_type,
-                    "triggers": TriggerSerializer(trigger).data
-                }
-            )
+            execution_log(workflow_id, ExecutionLog.TRIGGER_MATCHED, payload=payload, event_type=event_type,
+                          triggers=TriggerSerializer(trigger).data)
 
             for action in wf.actions.all().order_by("order"):
                 action_data = ActionSerializer(action).data
@@ -46,25 +39,14 @@ def log_event_task(workspace_id, payload, event_type):
                     action_data=action_data,
                     workflow_id=workflow_id,
                     payload=payload,
+                    workspace_id=workspace_id,
                 )
-                ExecutionLog.log_entry(
-                    workflow_id=workflow_id,
-                    status=ExecutionLog.ACTION_ENQUEUED,
-                    detail={
-                        "action": action_data,
-                        "event_context": {
-                            "triggered_by": trigger_id,
-                            "event_type": event_type
-                        }
-                    }
-                )
+                execution_log(workflow_id, ExecutionLog.ACTION_ENQUEUED, action=action_data, triggered_by=trigger_id,
+                              event_type=event_type)
+
         except Trigger.DoesNotExist | Workflow.DoesNotExist as e:
             logger.error("Something went wrong with trigger registry")
-            ExecutionLog.log_entry(
-                workflow_id=workflow_id,
-                status=ExecutionLog.INTERNAL_ERROR,
-                detail={"error": e.__dict__}
-            )
+            execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, error=e)
             raise
 
     except Exception as e:
@@ -75,108 +57,63 @@ def log_event_task(workspace_id, payload, event_type):
     bind=True,
     retry_kwargs={"max_retries": max_retries}
 )
-def execute_actions(self, action_data, workflow_id, payload):
-    ExecutionLog.objects.create(
-        workflow_id=workflow_id,
-        status=ExecutionLog.ACTION_STARTED
-    )
+def execute_actions(self, action_data, workflow_id, payload, workspace_id):
+    execution_log(workflow_id, ExecutionLog.ACTION_STARTED)
 
     try:
         action = ActionSerializer(data=action_data)
         action.is_valid(raise_exception=True)
         action = action.save(commit=False)
 
-        execute = load_action_plugin(action.type)
-        output = execute(payload, action.config)
+        installed_p = (InstalledPlugin.objects.filter(workspace_id=workspace_id, slug=action.type)
+                       .values_list("slug", "version").first())
+        if installed_p is None:
+            err = f"The plugin is not installed for action {action.type}"
+            logger.error(err)
+            execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, action=action_data, message=err)
+            return
 
-        if not isinstance(output, dict) or not any(
-                hasattr(output, attr) for attr in ['message', 'status', 'status_code']):
+        plugin: HooklinePlugin = load_action_plugin(installed_p['version'])
+        output = plugin.start(payload, action.config)
+
+        if (not isinstance(output, dict)
+                or not any(hasattr(output, attr) for attr in ['message', 'status', 'status_code'])):
             logger.error("Plugin returned malformed response!")
-            ExecutionLog.objects.create(
-                workflow_id=workflow_id,
-                status=ExecutionLog.PLUGIN_PROTOCOL_ERROR,
-                detail={
-                    "action": action_data,
-                    "plugin_output": str(output),
-                    "message": "The plugin returned malformed response"
-                }
-            )
+            execution_log(workflow_id, ExecutionLog.PLUGIN_PROTOCOL_ERROR, action=action_data, plugin_output=output,
+                          message="The plugin returned malformed response")
             return
 
         if output.get("status") != 'success':
-            ExecutionLog.objects.create(
-                workflow_id=workflow_id,
-                status=ExecutionLog.ACTION_FAILED,
-                detail={
-                    "action": action_data,
-                    "plugin_output": output,
-                }
-            )
+            execution_log(workflow_id, ExecutionLog.ACTION_FAILED, action=action_data, plugin_output=output)
             logger.error("The action failed", output.get("status"))
             return
 
-        ExecutionLog.objects.create(
-            workflow_id=workflow_id,
-            status=ExecutionLog.ACTION_COMPLETED,
-            detail={
-                "action": action_data,
-                "plugin_output": output,
-                "retry_count" : self.request.retries,
-            }
-        )
+        execution_log(workflow_id, ExecutionLog.ACTION_COMPLETED, action=action_data, plugin_output=output,
+                      retry_count=self.request.retries)
 
     except ValidationError as e:
         logger.error(f"There was error while deserializing the action", action_data, e)
-        ExecutionLog.log_entry(
-            workflow_id=workflow_id,
-            status=ExecutionLog.INTERNAL_ERROR,
-            detail={
-                "action": action_data,
-                "error": e.error_dict
-            }
-        )
-        return
-    except (FileNotFoundError, NotADirectoryError, FileNotFoundError, AttributeError, ImportError) as e:
+        execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, action=action_data, error=e.error_dict)
+        raise
+    except (FileNotFoundError, NotADirectoryError, FileNotFoundError, ImportError) as e:
         logger.error(f"There was an error in the plugin", action_data, e)
-        ExecutionLog.log_entry(
-            workflow_id=workflow_id,
-            status=ExecutionLog.INTERNAL_ERROR,
-            detail={
-                "action": action_data,
-                "error": e.__dict__,
-                "message": f"There was an error in loading plugin {action_data['type']}"
-            }
-        )
+        execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, action=action_data, error=e,
+                      message=f"There was an error in loading plugin {action_data['type']}")
+        raise
+    except AttributeError as e:
+        logger.error(e)
+        execution_log(workflow_id, ExecutionLog.PLUGIN_PROTOCOL_ERROR, action=action_data,
+                      message="The plugin does not have create_plugin() method")
         raise
     except Exception as e:
         logger.error("Unknown error", e)
-        ExecutionLog.log_entry(
-            workflow_id=workflow_id,
-            status=ExecutionLog.INTERNAL_ERROR,
-            detail={
-                "action": action_data,
-                "error": e.__dict__
-            }
-        )
+        execution_log(workflow_id, ExecutionLog.INTERNAL_ERROR, action=action_data, error=e)
+
         if self.request.retries < max_retries:
             logger.debug("Retrying action...", action_data)
-            ExecutionLog.log_entry(
-                workflow_id=workflow_id,
-                status=ExecutionLog.RETRY_SCHEDULED,
-                detail={
-                    "action": action_data,
-                    "reason": e.__dict__,
-                    "retry_count": self.request.retries
-                }
-            )
+            execution_log(workflow_id, ExecutionLog.RETRY_SCHEDULED, action=action_data, reason=e,
+                          retry_count=self.request.retries)
             raise self.retry(exc=e)
         else:
-            ExecutionLog.log_entry(
-                workflow_id=workflow_id,
-                status=ExecutionLog.RETRY_FAILED,
-                detail={
-                    "action": action_data,
-                    "reason": e.__dict__,
-                    "retry_count": self.request.retries
-                }
-            )
+            execution_log(workflow_id, ExecutionLog.RETRY_FAILED, action=action_data, reason=e,
+                          retry_count=self.request.retries)

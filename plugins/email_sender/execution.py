@@ -1,11 +1,18 @@
 from hookline_sdk.decorators import plugin_version
+from hookline_sdk.registry import HooklinePlugin
 
-@plugin_version("1.0.0")
-def execute(payload:dict, config:dict):
-    print(f"Sending mail to {config.get("to")}")
 
-    return {
-        "status": "success",
-        "message": "Email sent successfully",
-        "status_code": 200,
-    }
+class EmailPlugin(HooklinePlugin):
+
+    @plugin_version("1.0.0")
+    def execute(self, payload: dict, config: dict):
+        print(f"Sending mail to {config.get("to")}")
+
+        return {
+            "status": "success",
+            "message": "Email sent successfully",
+            "status_code": 200,
+        }
+
+def create_plugin(version) -> HooklinePlugin:
+    return EmailPlugin(version)

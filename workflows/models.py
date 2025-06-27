@@ -16,6 +16,7 @@ class Workspace(models.Model):
     def __str__(self):
         return self.name
 
+
 class Workflow(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
@@ -28,6 +29,7 @@ class Workflow(models.Model):
     def __str__(self):
         return self.name
 
+
 class Trigger(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workflow = models.ForeignKey(to=Workflow, on_delete=models.CASCADE, related_name="triggers")
@@ -36,6 +38,7 @@ class Trigger(models.Model):
 
     def __str__(self):
         return self.type
+
 
 class Action(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -46,6 +49,7 @@ class Action(models.Model):
 
     def __str__(self):
         return self.type
+
 
 class ExecutionLog(models.Model):
     TRIGGER_MATCHED = "TM"
@@ -80,7 +84,7 @@ class ExecutionLog(models.Model):
         return self.status
 
     @staticmethod
-    def log_entry(workflow_id:uuid.UUID, status, detail:dict):
+    def log_entry(workflow_id: uuid.UUID, status, detail: dict):
         ExecutionLog.objects.create(
             workflow_id=workflow_id,
             status=status,
@@ -100,7 +104,8 @@ class WebhookEndpoint(models.Model):
 
 
 class InstalledPlugin(models.Model):
-    workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE, related_name="installed_plugins", editable=False)
+    workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE, related_name="installed_plugins",
+                                  editable=False)
     slug = models.CharField(max_length=100)
     name = models.CharField(max_length=200)
     version = models.CharField(max_length=20)
@@ -108,7 +113,7 @@ class InstalledPlugin(models.Model):
     author = models.CharField(max_length=200)
     icon = models.TextField()
     config_schema = models.JSONField()
-    user_config = models.JSONField() #TODO - db validator to prevent incorrect config
+    user_config = models.JSONField()  # TODO - db validator to prevent incorrect config
     installed_at = models.DateTimeField(auto_now_add=True, editable=False)
     installed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
 

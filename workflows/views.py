@@ -139,7 +139,4 @@ class InstalledPluginsView(mixins.ListModelMixin, mixins.CreateModelMixin, mixin
         else:
             return InstalledPluginSerializer
 
-
-    #TODO - Handle the installation + update of plugins
-
-
+    # TODO - Handle the installation + update of plugins
