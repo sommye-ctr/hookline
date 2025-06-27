@@ -152,7 +152,7 @@ class InstalledPluginsView(mixins.ListModelMixin, mixins.CreateModelMixin, mixin
         if len(plugin) < 1:
             return Response(f"Plugin {slug} not found", status=status.HTTP_404_NOT_FOUND)
         return plugin[0]
--
+
     def create(self, request, *args, **kwargs):
         ws = self.kwargs['workspace_pk']
         slug = request.data['slug']
