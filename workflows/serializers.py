@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from packaging.version import parse as parse_version, InvalidVersion
 
 from workflows.models import Workspace, Trigger, Action, Workflow, ExecutionLog, WebhookEndpoint, InstalledPlugin
 
@@ -184,3 +185,7 @@ class InstalledPluginSerializer(serializers.ModelSerializer):
         model = InstalledPlugin
         fields = ["slug", "name", "version", "icon", "version", "description",
                   "author", "user_config", "installed_by"]
+
+    def validate_version(self, obj):
+        parse_version(obj)
+        return obj
