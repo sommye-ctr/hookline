@@ -25,7 +25,7 @@ class Role(models.Model):
 class Workspace(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
-    owner = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="workspaces")  # by default an admin
+    owner = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="owned_workspaces")  # by default an admin
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -83,6 +83,18 @@ class Workflow(models.Model):
         return self.name
 
 
+class WorkspaceMember(models.Model):
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="workspaces")
+    workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE, related_name="members")
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'workspace']
+
+    def __str__(self):
+        return f"{self.user.username} in {self.workspace.name}"
+
+
 # list/retrieve - member
 # update/delete - admin/workflow creator
 # create - member
@@ -112,7 +124,7 @@ class Action(models.Model):
         return self.type
 
 
-# list - admin/workflow creator
+# list/retrieve - admin/workflow creator
 class ExecutionLog(models.Model):
     TRIGGER_MATCHED = "TM"
     ACTION_ENQUEUED = "AE"
