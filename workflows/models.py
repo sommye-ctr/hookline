@@ -6,10 +6,21 @@ from django.db import models
 from workflows.utils import generate_webhook_token
 
 
+# admin, member
+class Role(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+# list/retrieve - admin/member
+# update/delete - admin
+# create - authenticated user
 class Workspace(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
-    owner = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="workspaces")
+    owner = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="workspaces")  # by default an admin
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -17,6 +28,42 @@ class Workspace(models.Model):
         return self.name
 
 
+class UserRole(models.Model):
+    role = models.ForeignKey(to=Role, on_delete=models.CASCADE)
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="user_roles")
+    workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'role', 'workspace']
+
+    def __str__(self):
+        return f"{self.user.username} as {self.role.name} in {self.workspace.name}"
+
+
+class Permission(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+
+class RolePermission(models.Model):
+    role = models.ForeignKey(to=Role, on_delete=models.CASCADE, related_name="permissions")
+    permission = models.ForeignKey(to=Permission, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ['role', 'permission']
+
+    def __str__(self):
+        return f"{self.role.name} with {self.permission.name}"
+
+
+# list/retrieve - member
+# update/delete - admin/creator
+# create - member
+# TODO Add created by field
 class Workflow(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
@@ -30,6 +77,10 @@ class Workflow(models.Model):
         return self.name
 
 
+# list/retrieve - member
+# update/delete - admin/workflow creator
+# create - member
+# TODO Add created by field
 class Trigger(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workflow = models.ForeignKey(to=Workflow, on_delete=models.CASCADE, related_name="triggers")
@@ -40,6 +91,10 @@ class Trigger(models.Model):
         return self.type
 
 
+# list/retrieve - member
+# update/delete - admin/workflow creator
+# create - member
+# TODO Add created by field
 class Action(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workflow = models.ForeignKey(to=Workflow, on_delete=models.CASCADE, related_name="actions")
@@ -51,6 +106,7 @@ class Action(models.Model):
         return self.type
 
 
+# list - admin/workflow creator
 class ExecutionLog(models.Model):
     TRIGGER_MATCHED = "TM"
     ACTION_ENQUEUED = "AE"
@@ -92,6 +148,7 @@ class ExecutionLog(models.Model):
         )
 
 
+# list/retrieve/update/delete/create - admin
 class WebhookEndpoint(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE, related_name="webhooks")
@@ -103,6 +160,9 @@ class WebhookEndpoint(models.Model):
         unique_together = ("workspace", "platform")
 
 
+# list/retrieve - member
+# update/delete - admin
+# create - member
 class InstalledPlugin(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE, related_name="installed_plugins",
