@@ -9,6 +9,11 @@ from workflows.utils import generate_webhook_token
 # admin, member
 class Role(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
 
     def __str__(self):
         return self.name
@@ -52,6 +57,7 @@ class Permission(models.Model):
 class RolePermission(models.Model):
     role = models.ForeignKey(to=Role, on_delete=models.CASCADE, related_name="permissions")
     permission = models.ForeignKey(to=Permission, on_delete=models.CASCADE)
+    granted_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ['role', 'permission']
