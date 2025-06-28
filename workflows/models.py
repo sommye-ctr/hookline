@@ -2,7 +2,6 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.fields import UUIDField
 
 from workflows.utils import generate_webhook_token
 

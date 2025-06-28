@@ -1,4 +1,3 @@
-from django.core.serializers import serialize
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
