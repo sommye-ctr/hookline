@@ -7,7 +7,6 @@ router.register("workspaces", views.WorkspaceView)
 router.register("workflows", views.WorkflowView)
 router.register("triggers", views.TriggerView)
 router.register("actions", views.ActionView)
-router.register("execution-logs", views.ExecutionLogsView)
 router.register("webhook-endpoints", views.WebhookEndpointView)
 
 workspace_router = routers.NestedDefaultRouter(router, "workspaces", lookup='workspace')

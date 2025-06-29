@@ -5,39 +5,25 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView, Response
 from packaging.version import parse as parse_version, InvalidVersion
 
-from workflows.models import Workspace, Workflow, Trigger, Action, ExecutionLog, WebhookEndpoint, InstalledPlugin, \
-    PermissionType
+from workflows.models import Workspace, Workflow, Trigger, Action, ExecutionLog, WebhookEndpoint, InstalledPlugin
 from workflows.serializers import WorkspaceListSerializer, WorkspaceSerializer, WorkflowListSerializer, \
-    WorkflowSerializer, TriggerSerializer, ActionSerializer, ExecutionLogSerializer, ExecutionLogListSerializer, \
+    WorkflowSerializer, TriggerSerializer, ActionSerializer, ExecutionLogListSerializer, \
     WebhookEndpointSerializer, InstalledPluginListSerializer, InstalledPluginSerializer
-from .permissions import RequirePermission
+from .permissions import WorkspacePermission, WebhookEndpointPermission, ExecutionLogPermission, \
+    InstalledPluginPermission
 from .tasks import log_event_task
 from .utils import extract_event_type, load_json_file
 
 
 class WorkspaceView(viewsets.ModelViewSet):
     queryset = Workspace.objects.all()
+    permission_classes = [WorkspacePermission]
 
     def get_serializer_class(self):
         if self.action == 'list':
             return WorkspaceListSerializer
         else:
             return WorkspaceSerializer
-
-    def get_permissions(self):
-        match self.action:
-            case 'create':
-                perm_classes = [IsAuthenticated]
-            case 'update':
-                perm_classes = [RequirePermission(PermissionType.UPDATE_WORKSPACE)]
-            case 'destroy':
-                perm_classes = [RequirePermission(PermissionType.DELETE_WORKSPACE)]
-            case 'list' | 'retrieve':
-                perm_classes = [RequirePermission(PermissionType.READ_WORKSPACE)]
-            case _:
-                perm_classes = self.permission_classes
-
-        return [permission() for permission in perm_classes]
 
 
 class WorkflowView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
@@ -110,15 +96,9 @@ class WorkflowActionView(mixins.ListModelMixin,
         serializer.save(workflow=workflow)
 
 
-class ExecutionLogsView(mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = ExecutionLog.objects.all()
-    serializer_class = ExecutionLogSerializer
-    permission_classes = [RequirePermission(PermissionType.READ_EX_LOGS)]
-
-
 class WorkflowExecutionLogsView(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = ExecutionLogListSerializer
-    permission_classes = [RequirePermission(PermissionType.READ_EX_LOGS)]
+    permission_classes = [ExecutionLogPermission]
 
     def get_queryset(self):
         wf = get_object_or_404(Workflow, pk=self.kwargs['workflow_pk'])
@@ -129,17 +109,7 @@ class WebhookEndpointView(viewsets.ModelViewSet):
     queryset = WebhookEndpoint.objects.all()
     serializer_class = WebhookEndpointSerializer
     http_method_names = ['get', 'post', 'delete']
-
-    def get_permissions(self):
-        match self.action:
-            case 'list' | 'retrieve':
-                perm_classes = [RequirePermission(PermissionType.READ_WEBHOOK_ENDPOINTS)]
-            case 'delete' | 'update' | 'create':
-                perm_classes = [RequirePermission(PermissionType.WRITE_WEBHOOK_ENDPOINTS)]
-            case _:
-                perm_classes = self.permission_classes
-
-        return [permission() for permission in perm_classes]
+    permission_classes = [WebhookEndpointPermission]
 
 
 class WebhookReceiverView(APIView):
@@ -165,6 +135,8 @@ class PluginsView(APIView):
 
 class InstalledPluginsView(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin,
                            mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    permission_classes = [InstalledPluginPermission]
+
     def get_queryset(self):
         return InstalledPlugin.objects.filter(workspace_id=self.kwargs['workspace_pk'])
 
@@ -173,21 +145,6 @@ class InstalledPluginsView(mixins.ListModelMixin, mixins.CreateModelMixin, mixin
             return InstalledPluginListSerializer
         else:
             return InstalledPluginSerializer
-
-    def get_permissions(self):
-        match self.action:
-            case 'list' | 'retrieve':
-                perm_classes = [RequirePermission(PermissionType.READ_INSTALLED_PLUGINS)]
-            case 'delete':
-                perm_classes = [RequirePermission(PermissionType.DELETE_INSTALLED_PLUGINS)]
-            case 'update_plugin':
-                perm_classes = [RequirePermission(PermissionType.UPDATE_INSTALLED_PLUGINS)]
-            case 'create':
-                perm_classes = [RequirePermission(PermissionType.CREATE_INSTALLED_PLUGINS)]
-            case _:
-                perm_classes = self.permission_classes
-
-        return [permission() for permission in perm_classes]
 
     def _get_plugin(self, slug: str):
         try:
