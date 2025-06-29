@@ -16,15 +16,10 @@ class PermissionType(models.TextChoices):
     DELETE_WORKFLOW = "delete_workflow", "Delete Workflow"
     CREATE_WORKFLOW = "create_workflow", "Create Workflow"
 
-    READ_TRIGGER = "read_trigger", "Read Trigger"
-    UPDATE_TRIGGER = "update_trigger", "Update Trigger"
-    DELETE_TRIGGER = "delete_trigger", "Delete Trigger"
-    CREATE_TRIGGER = "create_trigger", "Create Trigger"
-
-    READ_ACTION = "read_action", "Read Action"
-    UPDATE_ACTION = "update_action", "Update Action"
-    DELETE_ACTION = "delete_action", "Delete Action"
-    CREATE_ACTION = "create_action", "Create Action"
+    READ_WF_CONFIG = "read_wf_config", "Read trigger/action of workflow"
+    UPDATE_WF_CONFIG = "update_wf_config", "Update trigger/action of workflow"
+    DELETE_WF_CONFIG = "delete_wf_config", "Delete trigger/action of workflow"
+    CREATE_WF_CONFIG = "create_wf_config", "Create trigger/action of workflow"
 
     READ_EX_LOGS = "read_ex_logs", "Read Execution Logs"
 
@@ -108,7 +103,8 @@ class Workflow(models.Model):
     workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE, related_name="workflows")
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(to=User, on_delete=models.SET_NULL, related_name="created_workflows", null=True, editable=False)
+    created_by = models.ForeignKey(to=User, on_delete=models.SET_NULL, related_name="created_workflows", null=True,
+                                   editable=False)
 
     def __str__(self):
         return self.name

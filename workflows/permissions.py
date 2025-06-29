@@ -119,32 +119,13 @@ class WorkflowPermission(HooklinePermission):
         return super().has_object_permission(request, view, obj)
 
 
-class TriggerPermission(HooklinePermission):
+class WorkflowConfigPermission(HooklinePermission):
     permission_map = _get_permission_map(
-        list=PermissionType.READ_TRIGGER,
-        retrieve=PermissionType.READ_TRIGGER,
-        update=PermissionType.UPDATE_TRIGGER,
-        delete=PermissionType.DELETE_TRIGGER,
-        create=PermissionType.CREATE_TRIGGER,
-    )
-
-    def get_workspace_from_obj(self, obj) -> Workspace:
-        return obj.workflow.workspace
-
-    def has_object_permission(self, request, view, obj):
-        if request.method in ['PUT', 'DELETE'] and request.user and request.user == obj.workflow.created_by:
-            return True
-
-        return super().has_object_permission(request, view, obj)
-
-
-class ActionPermission(HooklinePermission):
-    permission_map = _get_permission_map(
-        list=PermissionType.READ_ACTION,
-        retrieve=PermissionType.READ_ACTION,
-        update=PermissionType.UPDATE_ACTION,
-        delete=PermissionType.DELETE_ACTION,
-        create=PermissionType.CREATE_ACTION,
+        list=PermissionType.READ_WF_CONFIG,
+        retrieve=PermissionType.READ_WF_CONFIG,
+        update=PermissionType.UPDATE_WF_CONFIG,
+        delete=PermissionType.DELETE_WF_CONFIG,
+        create=PermissionType.CREATE_WF_CONFIG,
     )
 
     def get_workspace_from_obj(self, obj) -> Workspace:

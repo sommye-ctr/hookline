@@ -10,7 +10,7 @@ from workflows.serializers import WorkspaceListSerializer, WorkspaceSerializer, 
     WorkflowSerializer, TriggerSerializer, ActionSerializer, ExecutionLogListSerializer, \
     WebhookEndpointSerializer, InstalledPluginListSerializer, InstalledPluginSerializer
 from .permissions import WorkspacePermission, WebhookEndpointPermission, ExecutionLogPermission, \
-    InstalledPluginPermission
+    InstalledPluginPermission, WorkflowPermission, WorkflowConfigPermission
 from .tasks import log_event_task
 from .utils import extract_event_type, load_json_file
 
@@ -30,11 +30,14 @@ class WorkflowView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                    mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Workflow.objects.all()
     serializer_class = WorkflowSerializer
+    permission_classes = [WorkflowPermission]
 
 
 class WorkspaceWorkflowView(mixins.ListModelMixin,
                             mixins.CreateModelMixin,
                             viewsets.GenericViewSet):
+    permission_classes = [WorkflowPermission]
+
     def get_queryset(self):
         workspace = get_object_or_404(Workspace, pk=self.kwargs['workspace_pk'])
         return Workflow.objects.filter(workspace=workspace)
@@ -55,12 +58,14 @@ class TriggerView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                   mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Trigger.objects.all()
     serializer_class = TriggerSerializer
+    permission_classes = [WorkflowConfigPermission]
 
 
 class WorkflowTriggerView(mixins.ListModelMixin,
                           mixins.CreateModelMixin,
                           viewsets.GenericViewSet):
     serializer_class = TriggerSerializer
+    permission_classes = [WorkflowConfigPermission]
 
     def get_workflow(self):
         return get_object_or_404(Workflow, pk=self.kwargs['workflow_pk'])
@@ -78,12 +83,14 @@ class ActionView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                  mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Action.objects.all()
     serializer_class = ActionSerializer
+    permission_classes = [WorkflowConfigPermission]
 
 
 class WorkflowActionView(mixins.ListModelMixin,
                          mixins.CreateModelMixin,
                          viewsets.GenericViewSet):
     serializer_class = ActionSerializer
+    permission_classes = [WorkflowConfigPermission]
 
     def get_workflow(self):
         return get_object_or_404(Workflow, pk=self.kwargs['workflow_pk'])
