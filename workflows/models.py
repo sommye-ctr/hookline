@@ -6,6 +6,45 @@ from django.db import models
 from workflows.utils import generate_webhook_token
 
 
+class PermissionType(models.TextChoices):
+    READ_WORKSPACE = "read_workspace", "Read Workspace"
+    UPDATE_WORKSPACE = "update_workspace", "Update Workspace"
+    DELETE_WORKSPACE = "delete_workspace", "Delete Workspace"
+
+    READ_WORKFLOW = "read_workflow", "Read Workflow"
+    UPDATE_WORKFLOW = "update_workflow", "Update Workflow"
+    DELETE_WORKFLOW = "delete_workflow", "Delete Workflow"
+    CREATE_WORKFLOW = "create_workflow", "Create Workflow"
+
+    READ_TRIGGER = "read_trigger", "Read Trigger"
+    UPDATE_TRIGGER = "update_trigger", "Update Trigger"
+    DELETE_TRIGGER = "delete_trigger", "Delete Trigger"
+    CREATE_TRIGGER = "create_trigger", "Create Trigger"
+
+    READ_ACTION = "read_action", "Read Action"
+    UPDATE_ACTION = "update_action", "Update Action"
+    DELETE_ACTION = "delete_action", "Delete Action"
+    CREATE_ACTION = "create_action", "Create Action"
+
+    READ_EX_LOGS = "read_ex_logs", "Read Execution Logs"
+
+    READ_WEBHOOK_ENDPOINTS = "read_webhook_endpoints", "Read Webhook Endpoints"
+    WRITE_WEBHOOK_ENDPOINTS = "write_webhook_endpoints", "Write Webhook Endpoints"
+
+    READ_INSTALLED_PLUGINS = "read_installed_plugins", "Read Installed Plugins"
+    UPDATE_INSTALLED_PLUGINS = "update_installed_plugins", "Update Installed Plugins"
+    DELETE_INSTALLED_PLUGINS = "delete_installed_plugins", "Delete Installed Plugins"
+    CREATE_INSTALLED_PLUGINS = "create_installed_plugins", "Create Installed Plugins"
+
+
+class Permission(models.Model):
+    name = models.CharField(max_length=100, choices=PermissionType, unique=True)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.get_name_display()
+
+
 # admin, member
 class Role(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -44,14 +83,6 @@ class UserRole(models.Model):
 
     def __str__(self):
         return f"{self.user.username} as {self.role.name} in {self.workspace.name}"
-
-
-class Permission(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-
-    def __str__(self):
-        return self.name
 
 
 class RolePermission(models.Model):

@@ -5,11 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView, Response
 from packaging.version import parse as parse_version, InvalidVersion
 
-from workflows.models import Workspace, Workflow, Trigger, Action, ExecutionLog, WebhookEndpoint, InstalledPlugin
+from workflows.models import Workspace, Workflow, Trigger, Action, ExecutionLog, WebhookEndpoint, InstalledPlugin, \
+    PermissionType
 from workflows.serializers import WorkspaceListSerializer, WorkspaceSerializer, WorkflowListSerializer, \
     WorkflowSerializer, TriggerSerializer, ActionSerializer, ExecutionLogSerializer, ExecutionLogListSerializer, \
     WebhookEndpointSerializer, InstalledPluginListSerializer, InstalledPluginSerializer
-from .permissions import RequirePermission, PermissionType
+from .permissions import RequirePermission
 from .tasks import log_event_task
 from .utils import extract_event_type, load_json_file
 
