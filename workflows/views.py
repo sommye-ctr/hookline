@@ -141,6 +141,7 @@ class PluginsView(APIView):
         return Response(plugins, status=status.HTTP_200_OK)
 
 
+#TODO - use slug instead of id in endpoint
 class InstalledPluginsView(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin,
                            mixins.DestroyModelMixin, viewsets.GenericViewSet):
     permission_classes = [InstalledPluginPermission]

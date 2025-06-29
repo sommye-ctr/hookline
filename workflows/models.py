@@ -53,7 +53,8 @@ class Role(models.Model):
         return self.name
 
 
-# list/retrieve - admin/member
+# list - auth
+# retrieve - admin/member
 # update/delete - admin
 # create - authenticated user
 class Workspace(models.Model):
@@ -124,7 +125,7 @@ class WorkspaceMember(models.Model):
 
 # list/retrieve - member
 # update/delete - admin/workflow creator
-# create - admin/workflow creator #TODO
+# create - admin/workflow creator
 class Trigger(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workflow = models.ForeignKey(to=Workflow, on_delete=models.CASCADE, related_name="triggers")
@@ -137,7 +138,7 @@ class Trigger(models.Model):
 
 # list/retrieve - member
 # update/delete - admin/workflow creator
-# create - admin/workflow creator #TODO
+# create - admin/workflow creator
 class Action(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workflow = models.ForeignKey(to=Workflow, on_delete=models.CASCADE, related_name="actions")
@@ -191,7 +192,7 @@ class ExecutionLog(models.Model):
         )
 
 
-# list/retrieve/update/delete/create - admin
+# list/retrieve/delete/create - admin
 class WebhookEndpoint(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE, related_name="webhooks")

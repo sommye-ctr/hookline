@@ -1,15 +1,10 @@
 from abc import abstractmethod, ABC, ABCMeta
-from enum import Enum
-
 from django.contrib.auth.models import User
+from django.http import Http404
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import BasePermission, BasePermissionMetaclass
 
 from workflows.models import PermissionType, Permission, UserRole, Workspace, Workflow, Trigger
-
-
-class RoleType(Enum):
-    ADMIN = "ADMIN"
-    MEMBER = "MEMBER"
 
 
 def _get_permission_map(**kwargs):
@@ -18,8 +13,19 @@ def _get_permission_map(**kwargs):
 
 class PermissionMixin:
 
-    # TODO Implement workspace object retrieval
-    def get_workspace_from_view(self, request, view) -> Workspace:
+    def get_workspace_from_view(self, view) -> Workspace:
+        try:
+            ws = view.kwargs.get("workspace_pk") or view.kwargs.get("workspace_id")
+            if ws:
+                return get_object_or_404(Workspace, pk=ws)
+
+            wf = view.kwargs.get("workflow_pk") or view.kwargs.get("workflow_id")
+            if wf:
+                workflow = get_object_or_404(Workflow, pk=wf)
+                return workflow.workspace
+        except Http404:
+            raise AttributeError
+
         raise AttributeError
 
     def _get_user_permissions(self, user: User, workspace) -> set:
@@ -63,13 +69,18 @@ class HooklinePermission(BasePermission, ABC, PermissionMixin, metaclass=Hooklin
             return True
         return self.user_has_permission(user, ws, required_perm)
 
-    def has_permission(self, request, view):
+    def has_permission(self, request, view, **kwargs):
         user: User = request.user
         if not user or not user.is_authenticated:
             return False
 
+        # checking if there is workflow passed in kwargs (from WorkflowConfigPermission)
+        workflow = kwargs.get("workflow")
+        if workflow and isinstance(workflow, Workflow):
+            return self._get_final_permission(user, workflow.workspace, view)
+
         try:
-            ws = self.get_workspace_from_view(request, view)
+            ws = self.get_workspace_from_view(view)
         except AttributeError:
             return True
 
@@ -113,7 +124,10 @@ class WorkflowPermission(HooklinePermission):
         return obj.workspace
 
     def has_object_permission(self, request, view, obj):
-        if request.method in ['PUT', 'DELETE'] and request.user and obj.created_by == request.user:
+        if (request.method in ['PUT', 'DELETE']
+                and request.user
+                and request.user.is_authenticated
+                and obj.created_by == request.user):
             return True
 
         return super().has_object_permission(request, view, obj)
@@ -131,11 +145,30 @@ class WorkflowConfigPermission(HooklinePermission):
     def get_workspace_from_obj(self, obj) -> Workspace:
         return obj.workflow.workspace
 
+    # allows update, delete by workflow creator
     def has_object_permission(self, request, view, obj):
-        if request.method in ['PUT', 'DELETE'] and request.user and request.user == obj.workflow.created_by:
+        if (request.method in ['PUT', 'DELETE']
+                and request.user
+                and request.user.is_authenticated
+                and request.user == obj.workflow.created_by):
             return True
 
         return super().has_object_permission(request, view, obj)
+
+    # allows creation by workflow creator
+    def has_permission(self, request, view, **kwargs):
+        if (request.method == 'POST'
+                and request.user and request.user.is_authenticated):
+            wf = view.kwargs.get("workflow_pk") or view.kwargs.get("workflow_id")
+            if wf:
+                try:
+                    workflow = get_object_or_404(Workflow, pk=wf)
+                    if workflow.created_by == request.user:
+                        return True
+                except Http404:
+                    return super().has_permission(request, view)
+
+        return super().has_permission(request, view, workflow=workflow)
 
 
 class WebhookEndpointPermission(HooklinePermission):
@@ -159,6 +192,7 @@ class ExecutionLogPermission(HooklinePermission):
     def get_workspace_from_obj(self, obj) -> Workspace:
         return obj.workflow.workspace
 
+    # allows retrieval by workflow creator
     def has_object_permission(self, request, view, obj):
         if request.user and request.user == obj.workflow.created_by:
             return True
