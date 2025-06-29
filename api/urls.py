@@ -3,10 +3,10 @@ from rest_framework_nested import routers
 from workflows import views
 
 router = routers.DefaultRouter()
-router.register("workspaces", views.WorkspaceView)
-router.register("workflows", views.WorkflowView)
-router.register("triggers", views.TriggerView)
-router.register("actions", views.ActionView)
+router.register("workspaces", views.WorkspaceView, basename="workspace")
+router.register("workflows", views.WorkflowView, basename="workflow")
+router.register("triggers", views.TriggerView, basename="trigger")
+router.register("actions", views.ActionView, basename="action")
 
 workspace_router = routers.NestedDefaultRouter(router, "workspaces", lookup='workspace')
 workspace_router.register("workflows", views.WorkspaceWorkflowView, basename="workspace-workflow")

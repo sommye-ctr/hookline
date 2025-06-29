@@ -16,7 +16,6 @@ from .utils import extract_event_type, load_json_file
 
 
 class WorkspaceView(viewsets.ModelViewSet):
-    queryset = Workspace.objects.all()
     permission_classes = [WorkspacePermission]
 
     def get_serializer_class(self):
@@ -25,12 +24,17 @@ class WorkspaceView(viewsets.ModelViewSet):
         else:
             return WorkspaceSerializer
 
+    def get_queryset(self):
+        return Workflow.objects.filter(workspace__members=self.request.user)
+
 
 class WorkflowView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                    mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    queryset = Workflow.objects.all()
     serializer_class = WorkflowSerializer
     permission_classes = [WorkflowPermission]
+
+    def get_queryset(self):
+        return Workflow.objects.filter(workspace__members=self.request.user)
 
 
 class WorkspaceWorkflowView(mixins.ListModelMixin,
@@ -56,9 +60,11 @@ class WorkspaceWorkflowView(mixins.ListModelMixin,
 
 class TriggerView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                   mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    queryset = Trigger.objects.all()
     serializer_class = TriggerSerializer
     permission_classes = [WorkflowConfigPermission]
+
+    def get_queryset(self):
+        return Trigger.objects.filter(workflow__workspace__members=self.request.user)
 
 
 class WorkflowTriggerView(mixins.ListModelMixin,
@@ -81,9 +87,11 @@ class WorkflowTriggerView(mixins.ListModelMixin,
 
 class ActionView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                  mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    queryset = Action.objects.all()
     serializer_class = ActionSerializer
     permission_classes = [WorkflowConfigPermission]
+
+    def get_queryset(self):
+        return Action.objects.filter(workflow__workspace__members=self.request.user)
 
 
 class WorkflowActionView(mixins.ListModelMixin,
@@ -109,15 +117,19 @@ class WorkflowExecutionLogsView(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [ExecutionLogPermission]
 
     def get_queryset(self):
-        wf = get_object_or_404(Workflow, pk=self.kwargs['workflow_pk'])
-        return ExecutionLog.objects.filter(workflow=wf)
+        return ExecutionLog.objects.filter(
+            workflow_id=self.kwargs['workflow_pk'],
+            workflow__workspace__members=self.request.user
+        )
 
 
 class WebhookEndpointView(viewsets.ModelViewSet):
-    queryset = WebhookEndpoint.objects.all()
     serializer_class = WebhookEndpointSerializer
     http_method_names = ['get', 'post', 'delete']
     permission_classes = [WebhookEndpointPermission]
+
+    def get_queryset(self):
+        return WebhookEndpoint.objects.filter(workspace__members=self.request.user)
 
 
 class WebhookReceiverView(APIView):
@@ -141,13 +153,16 @@ class PluginsView(APIView):
         return Response(plugins, status=status.HTTP_200_OK)
 
 
-#TODO - use slug instead of id in endpoint
+# TODO - use slug instead of id in endpoint
 class InstalledPluginsView(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin,
                            mixins.DestroyModelMixin, viewsets.GenericViewSet):
     permission_classes = [InstalledPluginPermission]
 
     def get_queryset(self):
-        return InstalledPlugin.objects.filter(workspace_id=self.kwargs['workspace_pk'])
+        return InstalledPlugin.objects.filter(
+            workspace_id=self.kwargs['workspace_pk'],
+            workspace__members=self.request.user,
+        )
 
     def get_serializer_class(self):
         if self.action == 'list':
