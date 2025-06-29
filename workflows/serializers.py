@@ -95,7 +95,7 @@ class WorkflowListSerializer(serializers.ModelSerializer):
         model = Workflow
         fields = [
             'id', 'name', 'description', 'is_active', 'workspace_name',
-            'triggers_count', 'actions_count', 'date_created', 'date_updated'
+            'triggers_count', 'actions_count', 'date_created', 'date_updated', 'created_by_id'
         ]
         read_only_fields = ['id', 'date_created', 'date_updated']
 
@@ -118,7 +118,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'is_active', 'workspace',
             'triggers', 'actions', 'recent_logs',
-            'date_created', 'date_updated'
+            'date_created', 'date_updated', 'created_by'
         ]
         read_only_fields = ['id', 'date_created', 'date_updated']
 

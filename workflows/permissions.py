@@ -1,10 +1,10 @@
-from abc import abstractmethod, ABC
+from abc import abstractmethod, ABC, ABCMeta
 from enum import Enum
 
 from django.contrib.auth.models import User
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, BasePermissionMetaclass
 
-from workflows.models import PermissionType, Permission, UserRole, Workspace, Workflow, Trigger, WebhookEndpoint
+from workflows.models import PermissionType, Permission, UserRole, Workspace
 
 
 class RoleType(Enum):
@@ -43,7 +43,11 @@ class PermissionMixin:
         return req_perm in permissions
 
 
-class HooklinePermission(BasePermission, PermissionMixin, ABC):
+class HooklineMetaClass(BasePermissionMetaclass, ABCMeta):
+    pass
+
+
+class HooklinePermission(BasePermission, ABC, PermissionMixin, metaclass=HooklineMetaClass):
     @property
     @abstractmethod
     def permission_map(self) -> dict[str: PermissionType]:

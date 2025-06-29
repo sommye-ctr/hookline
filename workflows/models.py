@@ -100,7 +100,6 @@ class RolePermission(models.Model):
 # list/retrieve - member
 # update/delete - admin/creator
 # create - member
-# TODO Add created by field
 class Workflow(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
@@ -109,6 +108,7 @@ class Workflow(models.Model):
     workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE, related_name="workflows")
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(to=User, on_delete=models.SET_NULL, related_name="created_workflows", null=True, editable=False)
 
     def __str__(self):
         return self.name
@@ -129,12 +129,12 @@ class WorkspaceMember(models.Model):
 # list/retrieve - member
 # update/delete - admin/workflow creator
 # create - member
-# TODO Add created by field
 class Trigger(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workflow = models.ForeignKey(to=Workflow, on_delete=models.CASCADE, related_name="triggers")
     type = models.CharField(max_length=255)
     config = models.JSONField()
+    created_by = models.ForeignKey(to=User, on_delete=models.SET_NULL, related_name="created_triggers", null=True, editable=False)
 
     def __str__(self):
         return self.type
@@ -143,13 +143,13 @@ class Trigger(models.Model):
 # list/retrieve - member
 # update/delete - admin/workflow creator
 # create - member
-# TODO Add created by field
 class Action(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workflow = models.ForeignKey(to=Workflow, on_delete=models.CASCADE, related_name="actions")
     type = models.CharField(max_length=255)
     config = models.JSONField()  # TODO - db validator to prevent incorrect config
     order = models.PositiveIntegerField()
+    created_by = models.ForeignKey(to=User, on_delete=models.SET_NULL, related_name="created_actions", null=True, editable=False)
 
     def __str__(self):
         return self.type

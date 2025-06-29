@@ -47,7 +47,8 @@ class WorkspaceWorkflowView(mixins.ListModelMixin,
 
     def perform_create(self, serializer):
         workspace = get_object_or_404(Workspace, pk=self.kwargs['workspace_pk'])
-        serializer.save(workspace=workspace)
+        creator = self.request.user
+        serializer.save(workspace=workspace, created_by=creator)
 
 
 class TriggerView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
@@ -70,7 +71,8 @@ class WorkflowTriggerView(mixins.ListModelMixin,
 
     def perform_create(self, serializer):
         workflow = self.get_workflow()
-        serializer.save(workflow=workflow)
+        creator = self.request.user
+        serializer.save(workflow=workflow, created_by=creator)
 
 
 class ActionView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
@@ -93,7 +95,8 @@ class WorkflowActionView(mixins.ListModelMixin,
 
     def perform_create(self, serializer):
         workflow = self.get_workflow()
-        serializer.save(workflow=workflow)
+        creator = self.request.user
+        serializer.save(workflow=workflow, created_by=creator)
 
 
 class WorkflowExecutionLogsView(mixins.ListModelMixin, viewsets.GenericViewSet):
