@@ -128,13 +128,12 @@ class WorkspaceMember(models.Model):
 
 # list/retrieve - member
 # update/delete - admin/workflow creator
-# create - member
+# create - admin/workflow creator #TODO
 class Trigger(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workflow = models.ForeignKey(to=Workflow, on_delete=models.CASCADE, related_name="triggers")
     type = models.CharField(max_length=255)
     config = models.JSONField()
-    created_by = models.ForeignKey(to=User, on_delete=models.SET_NULL, related_name="created_triggers", null=True, editable=False)
 
     def __str__(self):
         return self.type
@@ -142,14 +141,13 @@ class Trigger(models.Model):
 
 # list/retrieve - member
 # update/delete - admin/workflow creator
-# create - member
+# create - admin/workflow creator #TODO
 class Action(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workflow = models.ForeignKey(to=Workflow, on_delete=models.CASCADE, related_name="actions")
     type = models.CharField(max_length=255)
     config = models.JSONField()  # TODO - db validator to prevent incorrect config
     order = models.PositiveIntegerField()
-    created_by = models.ForeignKey(to=User, on_delete=models.SET_NULL, related_name="created_actions", null=True, editable=False)
 
     def __str__(self):
         return self.type

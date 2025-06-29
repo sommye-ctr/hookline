@@ -4,7 +4,7 @@ from enum import Enum
 from django.contrib.auth.models import User
 from rest_framework.permissions import BasePermission, BasePermissionMetaclass
 
-from workflows.models import PermissionType, Permission, UserRole, Workspace
+from workflows.models import PermissionType, Permission, UserRole, Workspace, Workflow, Trigger
 
 
 class RoleType(Enum):
@@ -112,6 +112,12 @@ class WorkflowPermission(HooklinePermission):
     def get_workspace_from_obj(self, obj) -> Workspace:
         return obj.workspace
 
+    def has_object_permission(self, request, view, obj):
+        if request.method in ['PUT', 'DELETE'] and request.user and obj.created_by == request.user:
+            return True
+
+        return super().has_object_permission(request, view, obj)
+
 
 class TriggerPermission(HooklinePermission):
     permission_map = _get_permission_map(
@@ -125,6 +131,12 @@ class TriggerPermission(HooklinePermission):
     def get_workspace_from_obj(self, obj) -> Workspace:
         return obj.workflow.workspace
 
+    def has_object_permission(self, request, view, obj):
+        if request.method in ['PUT', 'DELETE'] and request.user and request.user == obj.workflow.created_by:
+            return True
+
+        return super().has_object_permission(request, view, obj)
+
 
 class ActionPermission(HooklinePermission):
     permission_map = _get_permission_map(
@@ -137,6 +149,12 @@ class ActionPermission(HooklinePermission):
 
     def get_workspace_from_obj(self, obj) -> Workspace:
         return obj.workflow.workspace
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in ['PUT', 'DELETE'] and request.user and request.user == obj.workflow.created_by:
+            return True
+
+        return super().has_object_permission(request, view, obj)
 
 
 class WebhookEndpointPermission(HooklinePermission):
@@ -159,6 +177,12 @@ class ExecutionLogPermission(HooklinePermission):
 
     def get_workspace_from_obj(self, obj) -> Workspace:
         return obj.workflow.workspace
+
+    def has_object_permission(self, request, view, obj):
+        if request.user and request.user == obj.workflow.created_by:
+            return True
+
+        return super().has_object_permission(request, view, obj)
 
 
 class InstalledPluginPermission(HooklinePermission):
