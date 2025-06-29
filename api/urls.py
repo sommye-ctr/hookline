@@ -1,5 +1,7 @@
 from django.urls import path, include
 from rest_framework_nested import routers
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
 from workflows import views
 
 router = routers.DefaultRouter()
@@ -23,5 +25,8 @@ urlpatterns = [
     path('', include(workspace_router.urls)),
     path('', include(workflow_router.urls)),
     path('webhooks/<token>/ingest', views.WebhookReceiverView.as_view(), name='webhook-ingest'),
-    path('plugins/', views.PluginsView.as_view(), name="plugins")
+    path('plugins/', views.PluginsView.as_view(), name="plugins"),
+
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

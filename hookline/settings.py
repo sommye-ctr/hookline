@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 import environ
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +30,6 @@ DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'workflows.apps.WorkflowsConfig',
     'rest_framework',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -74,7 +75,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'hookline.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -88,7 +88,6 @@ DATABASES = {
         'PORT': env('DB_PORT'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -108,7 +107,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
@@ -119,7 +117,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
@@ -133,3 +130,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=float(env('ACCESS_TOKEN_LIFETIME'))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=float(env('REFRESH_TOKEN_LIFETIME'))),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS256',
+}
