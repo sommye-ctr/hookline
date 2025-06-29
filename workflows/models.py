@@ -32,6 +32,11 @@ class PermissionType(models.TextChoices):
     CREATE_INSTALLED_PLUGINS = "create_installed_plugins", "Create Installed Plugins"
 
 
+class RoleType(models.TextChoices):
+    ADMIN = "admin", "ADMIN"
+    MEMBER = "member", "MEMBER"
+
+
 class Permission(models.Model):
     name = models.CharField(max_length=100, choices=PermissionType, unique=True)
     description = models.TextField()
@@ -42,7 +47,7 @@ class Permission(models.Model):
 
 # admin, member
 class Role(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True, choices=RoleType)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
