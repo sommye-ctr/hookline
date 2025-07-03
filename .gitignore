@@ -1,51 +1,89 @@
-# =========================
-# Global Ignored Files
-# =========================
+# ===================== #
+#  GLOBAL IGNORE RULES  #
+# ===================== #
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment files (in root, backend/, frontend/)
 .env
 .env.*
-*.env
-*.log
+.env.local
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Virtual environments
+venv/
+.venv/
+env/
+.envrc
+
+# Python cache
 __pycache__/
 *.py[cod]
-*.sqlite3
-.DS_Store
-*.swp
-*.swo
+*.pyo
+*.pyd
+*.pyc
+*.pytmp
+*.log
 
-# IDE and Editor folders
-.idea/
-.vscode/
+# Coverage reports
+htmlcov/
+.coverage
+.tox/
+.nox/
+.coverage.*
+.cache/
+.pytest_cache/
+nosetests.xml
+coverage.xml
 
-# Virtual Environments
-venv/
-env/
-.venv/
-backend/venv/
-backend/env/
-backend/.venv/
+# ===================== #
+#  DJANGO BACKEND       #
+# ===================== #
 
-# =========================
-# Backend (Django)
-# =========================
+# Byte-compiled / optimized / DLL files
 backend/__pycache__/
-backend/*.py[cod]
-backend/db.sqlite3
-backend/*.log
-backend/.env
-backend/.env.*
-backend/media/
-backend/staticfiles/   # if you collectstatic here
+backend/**/*.py[cod]
 
-# =========================
-# Frontend (Node, React, etc.)
-# =========================
+# Django static & media files (if generated locally)
+backend/staticfiles/
+backend/media/
+
+# Django secret key or config backups
+*.bak
+*.tmp
+
+# ===================== #
+#  REACT + VITE FRONTEND#
+# ===================== #
+
+# Node modules
 frontend/node_modules/
+
+# Vite build output
 frontend/dist/
 frontend/build/
-frontend/.env
-frontend/.env.*
 
-# =========================
-# MacOS
-# =========================
-*.DS_Store
+# Vite cache
+frontend/.vite/
+
+# Package manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Optional: ESLint / Prettier caches
+.eslintcache
+.prettiercache
