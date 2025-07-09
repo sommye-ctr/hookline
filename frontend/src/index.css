@@ -120,4 +120,13 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    h1 {
+        @apply text-5xl font-bold;
+    }
+
+    h3 {
+        @apply text-2xl;
+    }
 }
+
