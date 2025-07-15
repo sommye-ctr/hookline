@@ -131,5 +131,9 @@
     h3 {
         @apply text-2xl;
     }
+
+    header {
+        @apply bg-sidebar border-b border-border py-4;
+    }
 }
 
