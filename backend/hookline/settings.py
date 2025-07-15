@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'workflows.apps.WorkflowsConfig',
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -52,7 +53,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'api.middleware.ApiVersionMiddleware'
 ]
 
 ROOT_URLCONF = 'hookline.urls'
@@ -134,6 +134,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
@@ -143,4 +144,10 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': True,
     'ALGORITHM': 'HS256',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Hookline Client API',
+    'DESCRIPTION': 'API documentation for utilizing hookline engine',
+    'VERSION': '1.0.0',
 }
