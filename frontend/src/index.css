@@ -136,6 +136,10 @@
         @apply text-2xl;
     }
 
+    h4 {
+        @apply text-lg;
+    }
+
     header {
         @apply bg-sidebar border-b border-border py-4;
     }
