@@ -31,39 +31,11 @@ const data = {
             title: "Workflows",
             url: "#",
             icon: LucideWorkflow,
-            items: [
-                {
-                    title: "View All",
-                    url: "#",
-                },
-                {
-                    title: "Create New",
-                    url: "#",
-                },
-            ],
         },
         {
             title: "Plugins",
             url: "#",
             icon: LucideBlocks,
-            items: [
-                {
-                    title: "Introduction",
-                    url: "#",
-                },
-                {
-                    title: "Get Started",
-                    url: "#",
-                },
-                {
-                    title: "Tutorials",
-                    url: "#",
-                },
-                {
-                    title: "Changelog",
-                    url: "#",
-                },
-            ],
         },
         {
             title: "Triggers",
@@ -74,24 +46,6 @@ const data = {
             title: "Execution Logs",
             url: "#",
             icon: LucideLogs,
-            items: [
-                {
-                    title: "General",
-                    url: "#",
-                },
-                {
-                    title: "Team",
-                    url: "#",
-                },
-                {
-                    title: "Billing",
-                    url: "#",
-                },
-                {
-                    title: "Limits",
-                    url: "#",
-                },
-            ],
         },
     ],
 }
