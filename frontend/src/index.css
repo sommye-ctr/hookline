@@ -46,7 +46,7 @@
 
 :root {
     --background: oklch(0.943 0.013 252);
-    --card: oklch(0.943 0.013 252);
+    --card: oklch(0.952 0.003 264.542);
     --popover: oklch(0.943 0.013 252);
     --sidebar: oklch(0.952 0.003 264.542);
     --foreground: oklch(0.217 0 0);
@@ -126,6 +126,10 @@
 
     h1 {
         @apply text-5xl font-bold;
+    }
+
+    h2 {
+        @apply text-3xl;
     }
 
     h3 {
