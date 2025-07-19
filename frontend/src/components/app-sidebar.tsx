@@ -23,13 +23,13 @@ const data = {
     navMain: [
         {
             title: "Dashboard",
-            url: "#",
+            url: "",
             icon: LucideLayoutDashboard,
             isActive: true,
         },
         {
             title: "Workflows",
-            url: "#",
+            url: "workflows",
             icon: LucideWorkflow,
         },
         {

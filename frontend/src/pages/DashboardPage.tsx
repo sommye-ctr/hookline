@@ -1,20 +1,15 @@
 import {LucideCircleAlert, LucideCircleCheckBig, LucideWorkflow} from "lucide-react";
-import {Button} from "@/components/ui/button.tsx";
 import StatsCard from "@/components/StatsCard.tsx";
 import ListContentCard from "@/components/ListContentCard.tsx";
+import PageHeading from "@/components/PageHeading.tsx";
 
 
 const DashboardPage = () => {
     return (
         <>
-            <div className="flex justify-between mx-5 my-7">
-                <h3>Dashboard</h3>
-                <Button>
-                    <LucideWorkflow/>
-                    New Workflow
-                </Button>
-            </div>
-            <main className="mx-5">
+            <PageHeading heading="Dashboard" buttonIcon={<LucideWorkflow/>} buttonText="New Workflow"/>
+
+            <main>
                 <div className="grid grid-cols-3 gap-7">
                     <StatsCard title="Active Workflows" description="8 workflows executed today" color='chart-1'/>
                     <StatsCard title="Total Executions" description="+18% from last week" color='chart-2'/>
