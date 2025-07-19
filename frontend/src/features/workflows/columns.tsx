@@ -20,7 +20,10 @@ export const columns: ColumnDef<WorkflowModel>[] = [
                     <LucideWorkflow className="h-6 w-6"/>
                     <div className="flex flex-col">
                         <span className="text-sm">{name}</span>
-                        <span className="text-xs text-muted-foreground">{description}</span>
+                        <span
+                            className="text-xs text-muted-foreground truncate">
+                            {description.length > 30 ? description.slice(0, 30) + "…" : description}
+                        </span>
                     </div>
                 </div>
             )
