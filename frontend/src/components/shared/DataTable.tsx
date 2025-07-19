@@ -19,9 +19,9 @@ export function DataTable<TData, TValue>({
     });
 
     return (
-        <div className={`rounded-md border ${className}`}>
+        <div className={`rounded-md border bg-sidebar ${className}`}>
             <Table>
-                <TableHeader>
+                <TableHeader className="bg-sidebar-accent">
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>
                             {headerGroup.headers.map((header) => (
@@ -41,7 +41,7 @@ export function DataTable<TData, TValue>({
                     {table.getRowModel().rows.map((row) => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id}>
+                                <TableCell key={cell.id} className="p-4">
                                     {flexRender(
                                         cell.column.columnDef.cell,
                                         cell.getContext()

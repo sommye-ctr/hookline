@@ -11,7 +11,7 @@ import {
     SelectValue
 } from "@/components/ui/select.tsx";
 import {DataTable} from "@/components/shared/DataTable.tsx";
-import {columns} from "@/features/workflows/columns.ts";
+import {columns} from "@/features/workflows/columns.tsx";
 
 const WorkflowsPage = () => (
     <>
@@ -41,7 +41,7 @@ const WorkflowsPage = () => (
         </div>
 
         <DataTable
-            className="max-w-full mt-8"
+            className="max-w-full mt-4"
             columns={columns}
             data={[
                 {
@@ -50,7 +50,17 @@ const WorkflowsPage = () => (
                     description: "Send a message to a slack channel when a new event occurs",
                     isActive: true,
                     lastExecution: new Date(),
-                    actions: ["Email"],
+                    actions: ["Email", "Slack", "Issue"],
+                    triggers: ["Trello"],
+                    executionCount: 4,
+                },
+                {
+                    id: 2,
+                    name: "Slack Notifications",
+                    description: "Send a message to a slack channel when a new event occurs",
+                    isActive: false,
+                    lastExecution: new Date(),
+                    actions: ["Email", "Slack", "Issue"],
                     triggers: ["Trello"],
                     executionCount: 4,
                 },
