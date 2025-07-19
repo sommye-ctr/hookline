@@ -1,7 +1,7 @@
 import {LucideCircleAlert, LucideCircleCheckBig, LucideWorkflow} from "lucide-react";
-import StatsCard from "@/components/StatsCard.tsx";
-import ListContentCard from "@/components/ListContentCard.tsx";
-import PageHeading from "@/components/PageHeading.tsx";
+import StatsCard from "@/features/dashboard/components/StatsCard.tsx";
+import ListContentCard from "@/features/dashboard/components/ListContentCard.tsx";
+import PageHeading from "@/components/shared/PageHeading.tsx";
 
 
 const DashboardPage = () => {

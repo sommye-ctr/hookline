@@ -1,5 +1,5 @@
 import {type ColumnDef, flexRender, getCoreRowModel, useReactTable,} from "@tanstack/react-table";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table.tsx";
 
 type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];

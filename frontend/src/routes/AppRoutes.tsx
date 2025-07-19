@@ -1,8 +1,8 @@
 import {Route, Routes} from "react-router";
-import LoginPage from "@/pages/LoginPage.tsx";
-import DashboardPage from "@/pages/DashboardPage.tsx";
-import SideBarLayout from "@/components/SideBarLayout.tsx";
-import WorkflowsPage from "@/pages/WorkflowsPage.tsx";
+import LoginPage from "@/features/auth/LoginPage.tsx";
+import DashboardPage from "@/features/dashboard/DashboardPage.tsx";
+import SideBarLayout from "@/layouts/SideBarLayout.tsx";
+import WorkflowsPage from "@/features/workflows/WorkflowsPage.tsx";
 
 const AppRoutes = () => {
     return (

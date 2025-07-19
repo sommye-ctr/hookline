@@ -1,15 +1,5 @@
 import type {ColumnDef} from "@tanstack/react-table";
-
-export interface WorkflowModel {
-    id: number;
-    name: string;
-    description: string;
-    isActive: boolean;
-    actions: string[];
-    executionCount: number;
-    lastExecution: Date;
-    triggers: string[];
-}
+import type {WorkflowModel} from "@/models/WorkflowModel.ts";
 
 export const columns: ColumnDef<WorkflowModel>[] = [
     {

@@ -1,7 +1,7 @@
 "use client"
 
 import {type LucideIcon} from "lucide-react"
-import {SidebarGroup, SidebarMenu, SidebarMenuButton, SidebarMenuItem,} from "@/components/ui/sidebar"
+import {SidebarGroup, SidebarMenu, SidebarMenuButton, SidebarMenuItem,} from "@/components/ui/sidebar.tsx"
 import {Link} from "react-router";
 
 export function NavMain({

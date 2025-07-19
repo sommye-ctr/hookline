@@ -1,7 +1,7 @@
 import {SidebarInset, SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar.tsx";
-import {AppSidebar} from "@/components/app-sidebar.tsx";
+import {AppSidebar} from "@/components/sidebar/AppSidebar.tsx";
 import {Input} from "@/components/ui/input.tsx";
-import SearchDialog from "@/components/SearchDialog.tsx";
+import SearchDialog from "@/components/shared/SearchDialog.tsx";
 import {LucideBell, LucideSearch} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
 import {Outlet} from "react-router";

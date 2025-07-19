@@ -1,4 +1,4 @@
-import {LoginForm} from "@/components/login-form.tsx";
+import {LoginForm} from "@/features/auth/components/LoginForm.tsx";
 import {useState} from "react";
 
 

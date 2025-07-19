@@ -1,7 +1,6 @@
-import PageHeading from "@/components/PageHeading.tsx";
+import PageHeading from "@/components/shared/PageHeading.tsx";
 import {LucidePlus, LucideSearch} from "lucide-react";
 import {Input} from "@/components/ui/input.tsx";
-import {columns} from "@/models/WorkflowModel.ts";
 import {
     Select,
     SelectContent,
@@ -10,8 +9,9 @@ import {
     SelectLabel,
     SelectTrigger,
     SelectValue
-} from "@/components/ui/select";
-import {DataTable} from "@/components/DataTable.tsx";
+} from "@/components/ui/select.tsx";
+import {DataTable} from "@/components/shared/DataTable.tsx";
+import {columns} from "@/features/workflows/columns.ts";
 
 const WorkflowsPage = () => (
     <>

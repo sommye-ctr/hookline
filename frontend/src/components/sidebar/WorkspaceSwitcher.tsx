@@ -8,8 +8,8 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,} from "@/components/ui/sidebar"
+} from "@/components/ui/dropdown-menu.tsx"
+import {SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,} from "@/components/ui/sidebar.tsx"
 import {Avatar, AvatarFallback} from "@/components/ui/avatar.tsx";
 
 export function WorkspaceSwitcher({

@@ -5,10 +5,10 @@ import {
     LucideWorkflow, LucideZap,
 } from "lucide-react"
 
-import {NavMain} from "@/components/nav-main"
-import {NavUser} from "@/components/nav-user"
-import {WorkspaceSwitcher} from "@/components/workspace-switcher.tsx"
-import {Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail,} from "@/components/ui/sidebar"
+import {NavMain} from "@/components/sidebar/NavMain.tsx"
+import {NavUser} from "@/components/sidebar/NavUser.tsx"
+import {WorkspaceSwitcher} from "@/components/sidebar/WorkspaceSwitcher.tsx"
+import {Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail,} from "@/components/ui/sidebar.tsx"
 
 const data = {
     user: {

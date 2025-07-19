@@ -1,11 +1,11 @@
-import {cn} from "@/lib/utils"
-import {Button} from "@/components/ui/button"
+import {cn} from "@/utils/cn.ts"
+import {Button} from "@/components/ui/button.tsx"
 import {
     Card,
     CardContent,
-} from "@/components/ui/card"
-import {Input} from "@/components/ui/input"
-import {Label} from "@/components/ui/label"
+} from "@/components/ui/card.tsx"
+import {Input} from "@/components/ui/input.tsx"
+import {Label} from "@/components/ui/label.tsx"
 import * as React from "react";
 import {Separator} from "@/components/ui/separator.tsx";
 

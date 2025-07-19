@@ -5,7 +5,7 @@ import {
     CommandInput,
     CommandItem,
     CommandList
-} from '@/components/ui/command';
+} from '@/components/ui/command.tsx';
 import * as React from 'react';
 
 interface SearchDialogProps {
