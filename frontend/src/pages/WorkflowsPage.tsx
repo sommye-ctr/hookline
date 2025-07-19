@@ -1,6 +1,7 @@
 import PageHeading from "@/components/PageHeading.tsx";
 import {LucidePlus, LucideSearch} from "lucide-react";
 import {Input} from "@/components/ui/input.tsx";
+import {columns} from "@/models/WorkflowModel.ts";
 import {
     Select,
     SelectContent,
@@ -10,6 +11,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
+import {DataTable} from "@/components/DataTable.tsx";
 
 const WorkflowsPage = () => (
     <>
@@ -22,10 +24,9 @@ const WorkflowsPage = () => (
                 <LucideSearch className="absolute top-1/2 left-2 size-4 -translate-y-1/2 opacity-50 select-none"/>
             </div>
 
-
             <Select defaultValue="all">
                 <SelectTrigger className="w-[180px]">
-                    <SelectValue />
+                    <SelectValue/>
                 </SelectTrigger>
                 <SelectContent>
                     <SelectGroup>
@@ -36,7 +37,25 @@ const WorkflowsPage = () => (
                     </SelectGroup>
                 </SelectContent>
             </Select>
+
         </div>
+
+        <DataTable
+            className="max-w-full mt-8"
+            columns={columns}
+            data={[
+                {
+                    id: 1,
+                    name: "Slack Notifications",
+                    description: "Send a message to a slack channel when a new event occurs",
+                    isActive: true,
+                    lastExecution: new Date(),
+                    actions: ["Email"],
+                    triggers: ["Trello"],
+                    executionCount: 4,
+                },
+            ]}
+        />
     </>
 );
 
