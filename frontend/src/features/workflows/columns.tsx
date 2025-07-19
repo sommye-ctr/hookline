@@ -9,12 +9,10 @@ export const columns: ColumnDef<WorkflowModel>[] = [
     {
         accessorKey: "name",
         header: "Name",
-        accessorFn: (row) => ({
-            name: row.name,
-            description: row.description,
-        }),
-        cell: ({getValue}) => {
-            const {name, description} = getValue() as { name: string, description: string }
+        filterFn: "includesString",
+        cell: ({row}) => {
+            const name: string = row.getValue("name");
+            const description: string = row.original.description;
             return (
                 <div className="flex items-center gap-2">
                     <LucideWorkflow className="h-6 w-6"/>
