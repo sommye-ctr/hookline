@@ -8,7 +8,7 @@ import {LucideWorkflow} from "lucide-react";
 export const columns: ColumnDef<WorkflowModel>[] = [
     {
         accessorKey: "name",
-        header: "Name",
+        header: "Workflow",
         filterFn: "includesString",
         cell: ({row}) => {
             const name: string = row.getValue("name");
