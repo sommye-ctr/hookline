@@ -26,6 +26,23 @@ const WorkflowsPage = () => {
         ]);
     };
 
+     const setStatusFilter = (value: boolean) => {
+         setFilters(prev => [
+             ...prev.filter(f => f.id !== "isActive"),
+             {id: "isActive", value: value},
+         ]);
+     }
+
+    const handleStatusChange = (value: string) => {
+        if (value === "all") {
+            setFilters([]);
+        } else if (value === "active") {
+            setStatusFilter(true);
+        } else {
+            setStatusFilter(false);
+        }
+    }
+
     return (
         <>
             <PageHeading heading="Workflows" buttonIcon={<LucidePlus/>} buttonText="New Workflow"/>
@@ -41,7 +58,7 @@ const WorkflowsPage = () => {
                     <LucideSearch className="absolute top-1/2 left-2 size-4 -translate-y-1/2 opacity-50 select-none"/>
                 </div>
 
-                <Select defaultValue="all">
+                <Select defaultValue="all" onValueChange={handleStatusChange}>
                     <SelectTrigger className="w-[180px]">
                         <SelectValue/>
                     </SelectTrigger>
