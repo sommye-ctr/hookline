@@ -4,7 +4,6 @@ import {DataTable} from "@/components/shared/DataTable.tsx";
 import {columns} from "@/features/workflows/columns.tsx";
 import {useState} from "react";
 import type {ColumnFiltersState} from "@tanstack/react-table";
-import {Input} from "@/components/ui/input.tsx";
 import {
     Select,
     SelectContent,
@@ -15,6 +14,7 @@ import {
     SelectValue
 } from "@/components/ui/select.tsx";
 import {Card, CardContent} from "@/components/ui/card.tsx";
+import IconInput from "@/components/shared/IconInput.tsx";
 
 const WorkflowsPage = () => {
     const [filters, setFilters] = useState<ColumnFiltersState>([]);
@@ -52,15 +52,7 @@ const WorkflowsPage = () => {
                 <CardContent className="p-0">
                     <div className="flex justify-between gap-4 m-4">
 
-                        <div className="relative w-full">
-                            <Input
-                                className="pl-8"
-                                placeholder="Search workflows..."
-                                onChange={(e) => handleFilterChange(e.target.value)}
-                            />
-                            <LucideSearch
-                                className="absolute top-1/2 left-2 size-4 -translate-y-1/2 opacity-50 select-none"/>
-                        </div>
+                        <IconInput placeholder="Search workflows..." icon={LucideSearch} onChange={(e) => handleFilterChange(e.target.value)}/>
 
                         <Select defaultValue="all" onValueChange={handleStatusChange}>
                             <SelectTrigger className="w-[180px]">

@@ -34,7 +34,7 @@ const data = {
         },
         {
             title: "Plugins",
-            url: "#",
+            url: "plugins",
             icon: LucideBlocks,
         },
         {
