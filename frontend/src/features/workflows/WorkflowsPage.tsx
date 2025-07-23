@@ -52,7 +52,8 @@ const WorkflowsPage = () => {
                 <CardContent className="p-0">
                     <div className="flex justify-between gap-4 m-4">
 
-                        <IconInput placeholder="Search workflows..." icon={LucideSearch} onChange={(e) => handleFilterChange(e.target.value)}/>
+                        <IconInput placeholder="Search workflows..." icon={LucideSearch}
+                                   onChange={(e) => handleFilterChange(e.target.value)}/>
 
                         <Select defaultValue="all" onValueChange={handleStatusChange}>
                             <SelectTrigger className="w-[180px]">
