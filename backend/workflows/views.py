@@ -9,7 +9,7 @@ from workflows.models import Workspace, Workflow, Trigger, Action, ExecutionLog,
 from workflows.serializers import WorkspaceListSerializer, WorkspaceSerializer, WorkflowListSerializer, \
     WorkflowSerializer, TriggerSerializer, ActionSerializer, ExecutionLogListSerializer, \
     WebhookEndpointSerializer, InstalledPluginListSerializer, InstalledPluginSerializer
-from .permissions import WorkspacePermission, WebhookEndpointPermission, ExecutionLogPermission, \
+from users.permissions import WorkspacePermission, WebhookEndpointPermission, ExecutionLogPermission, \
     InstalledPluginPermission, WorkflowPermission, WorkflowConfigPermission
 from .tasks import log_event_task
 from .utils import extract_event_type, load_json_file
