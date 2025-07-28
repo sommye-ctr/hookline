@@ -20,10 +20,6 @@ workflow_router.register("triggers", views.WorkflowTriggerView, basename="workfl
 workflow_router.register("actions", views.WorkflowActionView, basename="workflow-action")
 workflow_router.register("execution-logs", views.WorkflowExecutionLogsView, basename="workflow-execution-logs")
 
-user_router =routers.NestedDefaultRouter(router, "user", lookup="user")
-user_router.register('token', TokenObtainPairView.as_view(), basename='token-obtain-pair')
-user_router.register('refresh/', TokenRefreshView.as_view(), basename='token-refresh')
-
 urlpatterns = [
     path('', include(router.urls)),
     path('', include(workspace_router.urls)),

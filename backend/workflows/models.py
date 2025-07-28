@@ -1,71 +1,19 @@
 import uuid
-
-from django.contrib.auth.models import User
 from django.db import models
 
+from users.models import CustomUser, Role
 from workflows.utils import generate_webhook_token
-
-
-class PermissionType(models.TextChoices):
-    READ_WORKSPACE = "read_workspace", "Read Workspace"
-    UPDATE_WORKSPACE = "update_workspace", "Update Workspace"
-    DELETE_WORKSPACE = "delete_workspace", "Delete Workspace"
-
-    READ_WORKFLOW = "read_workflow", "Read Workflow"
-    UPDATE_WORKFLOW = "update_workflow", "Update Workflow"
-    DELETE_WORKFLOW = "delete_workflow", "Delete Workflow"
-    CREATE_WORKFLOW = "create_workflow", "Create Workflow"
-
-    READ_WF_CONFIG = "read_wf_config", "Read trigger/action of workflow"
-    UPDATE_WF_CONFIG = "update_wf_config", "Update trigger/action of workflow"
-    DELETE_WF_CONFIG = "delete_wf_config", "Delete trigger/action of workflow"
-    CREATE_WF_CONFIG = "create_wf_config", "Create trigger/action of workflow"
-
-    READ_EX_LOGS = "read_ex_logs", "Read Execution Logs"
-
-    READ_WEBHOOK_ENDPOINTS = "read_webhook_endpoints", "Read Webhook Endpoints"
-    WRITE_WEBHOOK_ENDPOINTS = "write_webhook_endpoints", "Write Webhook Endpoints"
-
-    READ_INSTALLED_PLUGINS = "read_installed_plugins", "Read Installed Plugins"
-    UPDATE_INSTALLED_PLUGINS = "update_installed_plugins", "Update Installed Plugins"
-    DELETE_INSTALLED_PLUGINS = "delete_installed_plugins", "Delete Installed Plugins"
-    CREATE_INSTALLED_PLUGINS = "create_installed_plugins", "Create Installed Plugins"
-
-
-class RoleType(models.TextChoices):
-    ADMIN = "admin", "ADMIN"
-    MEMBER = "member", "MEMBER"
-
-
-class Permission(models.Model):
-    name = models.CharField(max_length=100, choices=PermissionType, unique=True)
-    description = models.TextField()
-
-    def __str__(self):
-        return self.get_name_display()
-
-
-# admin, member
-class Role(models.Model):
-    name = models.CharField(max_length=100, unique=True, choices=RoleType)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['name']
-
-    def __str__(self):
-        return self.name
 
 
 # list - auth
 # retrieve - admin/member
 # update/delete - admin
-# create - authenticated user
+# create - authenticated CustomUser
 class Workspace(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
-    owner = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="owned_workspaces")  # by default an admin
+    owner = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE,
+                              related_name="owned_workspaces")  # by default an admin
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -75,7 +23,7 @@ class Workspace(models.Model):
 
 class UserRole(models.Model):
     role = models.ForeignKey(to=Role, on_delete=models.CASCADE)
-    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="user_roles")
+    user = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE, related_name="user_roles")
     workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -83,19 +31,7 @@ class UserRole(models.Model):
         unique_together = ['user', 'role', 'workspace']
 
     def __str__(self):
-        return f"{self.user.username} as {self.role.name} in {self.workspace.name}"
-
-
-class RolePermission(models.Model):
-    role = models.ForeignKey(to=Role, on_delete=models.CASCADE, related_name="permissions")
-    permission = models.ForeignKey(to=Permission, on_delete=models.CASCADE)
-    granted_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ['role', 'permission']
-
-    def __str__(self):
-        return f"{self.role.name} with {self.permission.name}"
+        return f"{self.user.email} as {self.role.name} in {self.workspace.name}"
 
 
 # list/retrieve - member
@@ -109,7 +45,8 @@ class Workflow(models.Model):
     workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE, related_name="workflows")
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(to=User, on_delete=models.SET_NULL, related_name="created_workflows", null=True,
+    created_by = models.ForeignKey(to=CustomUser, on_delete=models.SET_NULL, related_name="created_workflows",
+                                   null=True,
                                    editable=False)
 
     def __str__(self):
@@ -117,7 +54,7 @@ class Workflow(models.Model):
 
 
 class WorkspaceMember(models.Model):
-    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="workspaces")
+    user = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE, related_name="workspaces")
     workspace = models.ForeignKey(to=Workspace, on_delete=models.CASCADE, related_name="members")
     joined_at = models.DateTimeField(auto_now_add=True)
 
@@ -125,7 +62,7 @@ class WorkspaceMember(models.Model):
         unique_together = ['user', 'workspace']
 
     def __str__(self):
-        return f"{self.user.username} in {self.workspace.name}"
+        return f"{self.user.email} in {self.workspace.name}"
 
 
 # list/retrieve - member
@@ -224,7 +161,7 @@ class InstalledPlugin(models.Model):
     icon = models.TextField()
     config_schema = models.JSONField(null=True)
     installed_at = models.DateTimeField(auto_now_add=True, editable=False)
-    installed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
+    installed_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, editable=False)
 
     class Meta:
         unique_together = ('workspace', 'slug')

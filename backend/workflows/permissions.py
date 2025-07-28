@@ -1,10 +1,10 @@
 from abc import abstractmethod, ABC, ABCMeta
-from django.contrib.auth.models import User
 from django.http import Http404
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import BasePermission, BasePermissionMetaclass
 
-from workflows.models import PermissionType, Permission, UserRole, Workspace, Workflow, Trigger
+from users.models import CustomUser, Permission, PermissionType
+from workflows.models import UserRole, Workspace, Workflow
 
 
 def _get_permission_map(**kwargs):
@@ -28,7 +28,7 @@ class PermissionMixin:
 
         raise AttributeError
 
-    def _get_user_permissions(self, user: User, workspace) -> set:
+    def _get_user_permissions(self, user: CustomUser, workspace) -> set:
         if not user.is_authenticated:
             return set()
 
@@ -41,7 +41,7 @@ class PermissionMixin:
 
         return set(permissions)
 
-    def user_has_permission(self, user: User, workspace: Workspace, req_perm: PermissionType) -> bool:
+    def user_has_permission(self, user: CustomUser, workspace: Workspace, req_perm: PermissionType) -> bool:
         if not user.is_authenticated:
             return False
 
@@ -70,7 +70,7 @@ class HooklinePermission(BasePermission, ABC, PermissionMixin, metaclass=Hooklin
         return self.user_has_permission(user, ws, required_perm)
 
     def has_permission(self, request, view, **kwargs):
-        user: User = request.user
+        user: CustomUser = request.user
         if not user or not user.is_authenticated:
             return False
 
@@ -87,7 +87,7 @@ class HooklinePermission(BasePermission, ABC, PermissionMixin, metaclass=Hooklin
         return self._get_final_permission(user, ws, view)
 
     def has_object_permission(self, request, view, obj):
-        user: User = request.user
+        user: CustomUser = request.user
         if not user or not user.is_authenticated:
             return False
 

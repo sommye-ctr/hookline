@@ -33,17 +33,17 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users.apps.UsersConfig',
     'workflows.apps.WorkflowsConfig',
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
-    'users.apps.UsersConfig'
 ]
 
 MIDDLEWARE = [
@@ -83,7 +83,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'hookline',
-        'USER': 'projectuser',
+        'USER': 'hooklineuser',
         'PASSWORD': env('DB_PASSWORD'),
         'HOST': 'localhost',
         'PORT': env('DB_PORT'),
@@ -156,3 +156,5 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API documentation for utilizing hookline engine',
     'VERSION': '1.0.0',
 }
+
+AUTH_USER_MODEL = "users.CustomUser"

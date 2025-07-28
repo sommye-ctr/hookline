@@ -1,7 +1,7 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
 from packaging.version import parse as parse_version
 
+from users.models import CustomUser
 from users.serializers import UserSerializer
 from workflows.models import Workspace, Trigger, Action, Workflow, ExecutionLog, WebhookEndpoint, InstalledPlugin
 
@@ -23,7 +23,7 @@ JSONEncoder.default = new_default
 class WorkspaceSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
     owner_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
+        queryset=CustomUser.objects.all(),
         source="owner",
         write_only=True
     )
