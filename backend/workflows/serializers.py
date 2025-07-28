@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from packaging.version import parse as parse_version
 
+from users.serializers import UserSerializer
 from workflows.models import Workspace, Trigger, Action, Workflow, ExecutionLog, WebhookEndpoint, InstalledPlugin
 
 from json import JSONEncoder
@@ -17,13 +18,6 @@ def new_default(self, obj):
 
 
 JSONEncoder.default = new_default
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
-        read_only_fields = ['id']
 
 
 class WorkspaceSerializer(serializers.ModelSerializer):
